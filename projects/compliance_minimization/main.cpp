@@ -39,7 +39,7 @@ int main () {
 	/*
 		FEA Mesh:
 	*/
-	
+
 	// FEA mesh object for 2D analysis:
 	FEA::Mesh fea_mesh (2) ;
 
@@ -48,7 +48,7 @@ int main () {
 
 	// fea_box contains the (x,y) coordinates of 4 corner points of rectangle containing the mesh:
   	Matrix<double, -1, -1> fea_box (4, 2) ;
-  	
+
   	fea_box.data = {{   0,    0},
 					{nelx,    0},
 					{nelx, nely},
@@ -71,9 +71,9 @@ int main () {
 	double rho = 1.0 ; // Density
 
 	fea_mesh.solid_materials.push_back (FEA::SolidMaterial (2, E, nu, rho)) ;
-	
+
 	/*
-		Next we specify that we will undertake a stationary study, which takes the 
+		Next we specify that we will undertake a stationary study, which takes the
 		form [K]{u} = {f}:
 	*/
 
@@ -89,7 +89,7 @@ int main () {
 	vector<double>    coord = {0.0, 0.0}, tol = {1e-12, 1e10} ;
 	vector<int> fixed_nodes = fea_mesh.GetNodesByCoordinates (coord, tol) ;
 	vector<int>   fixed_dof = fea_mesh.dof (fixed_nodes) ;
-  
+
  	// Example 2: half of simply supported beam or MBB beam
 
  	// Left boundary condition
@@ -129,7 +129,7 @@ int main () {
 		load_val[2*i]   = 0.00 ; // load component in x direction.
 		load_val[2*i+1] = -0.5 ; // load component in y direction.
 	}
-  
+
 	// Example 2: half of simply supported beam or MBB beam
 
 	// coord = {0.0, nely}, tol = {1e-12, 1e-12} ;
@@ -145,14 +145,14 @@ int main () {
 	// Add point load to study and assemble load vector {f}:
 	FEA::PointValues point_load (load_dof, load_val) ;
 	fea_study.AssembleF (point_load, false) ;
-    
+
 	/*
 		FEA Solver:
 	*/
 
 	// Initialise guess solution for CG:
 	vector<double> u_guess (fea_mesh.n_dof, 0.0) ;
-	
+
 	// Convergence tolerance:
 	double cg_tolerence = 1.0e-6 ;
 
@@ -169,7 +169,7 @@ int main () {
 
 	// END OF SETTINGS FOR THE SENSITIVITY ANALYSIS
 
-  
+
 	/////////////////////////////////////////////////////////////////////////////
 	//                                                                         //
 	//                   SETTINGS FOR THE LEVEL SET METHOD                     //
@@ -183,10 +183,10 @@ int main () {
 	double    move_limit = 0.5 ;   // Maximum displacement per iteration in units of the mesh spacing.
 	double    band_width = 6 ;     // Width of the narrow band.
 	bool is_fixed_domain = false ; // Whether or not the domain boundary is fixed.
-  
+
 	/*
 		Seed initial holes:
-		In this example, we create five horizontal rows, each row alternating between 
+		In this example, we create five horizontal rows, each row alternating between
 		four and five equally spaced holes, all of radius 5 units.
 	*/
 
@@ -243,7 +243,7 @@ int main () {
 	double       max_area = 0.5 ;    // maximum material area.
 	double       max_diff = 0.0001 ; // relative difference between iterations must be less than this value to reach convergence.
 
-	/* 
+	/*
 		Lambda values for the optimiser:
 		These are reused, i.e. the solution from the current iteration is
 		used as an estimate for the next, hence we declare the vector
@@ -261,7 +261,7 @@ int main () {
 	//               SHOULD NOT NEED TO EDIT FILE BEYOND THIS POINT            //
 	//                                                                         //
 	/////////////////////////////////////////////////////////////////////////////
-  
+
 	/*
 		Create level set
 	*/
@@ -297,7 +297,7 @@ int main () {
 
 	// Initialise io object:
 	LSM::InputOutput io ;
-	
+
 	cout << "\nStarting compliance minimisation demo...\n\n" ;
 
 	// Print output header:
@@ -328,10 +328,10 @@ int main () {
 				fea_mesh.solid_elements[i].area_fraction = 1e-3 ;
 			}
 
-			else { 
+			else {
 				fea_mesh.solid_elements[i].area_fraction = lsm_mesh.elements[i].area ;
 			}
-		
+
 		}
 
 		// Assemble stiffness matrix [K] using area fraction method:
@@ -423,17 +423,17 @@ int main () {
 		times.push_back (time) ;
 		areas.push_back (area) ;
 
-		// Converence criterion [Dunning_11_FINAL]: 
+		// Converence criterion [Dunning_11_FINAL]:
 		// find the max relative distance over the past five iterations:
 		objective_values.push_back (sens.objective) ;
 		double objective_value_k, objective_value_m ;
 
 		if (n_iterations > 5) {
-			
+
 			objective_value_k = sens.objective ;
 			relative_difference = 0.0 ;
-			
-			for (int i = 1 ; i <= 5 ; i++) { 
+
+			for (int i = 1 ; i <= 5 ; i++) {
 				objective_value_m = objective_values[n_iterations - i - 1] ;
 				relative_difference = max(relative_difference, abs((objective_value_k - objective_value_m)/objective_value_k)) ;
 			}
@@ -456,11 +456,11 @@ int main () {
 		io.saveBoundarySegmentsTXT (n_iterations, boundary, "results/boundary_segments") ;
 
 		// Check if convergence has been met:
-		if ((relative_difference < max_diff) & (area < 1.001 * max_area)) brea k;
-	
+		if ((relative_difference < max_diff) & (area < 1.001 * max_area)) break;
+
 	}
 
-	// END OF LEVEL SET TOPOLOGY OPTIMIZATION LOOP  
+	// END OF LEVEL SET TOPOLOGY OPTIMIZATION LOOP
 
 
 	cout << "\nProgram complete.\n" << flush ;
