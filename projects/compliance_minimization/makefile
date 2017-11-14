@@ -30,10 +30,10 @@ bin/main.o: main.cpp
 		g++ -std=c++14 -O3 -w -c -o ../../M2DO_FEA/bin/sensitivity.o ../../M2DO_FEA/src/sensitivity.cpp -I ../../M2DO_FEA/include
 
 ../../M2DO_FEA/bin/stationary_study.o: ../../M2DO_FEA/src/stationary_study.cpp
-		g++ -std=c++14 -O3  -w -c -o ../../M2DO_FEA/bin/stationary_study.o ../../M2DO_FEA/src/stationary_study.cpp -I ../../M2DO_FEA/include  
+		g++ -std=c++14 -O3 -w -c -o ../../M2DO_FEA/bin/stationary_study.o ../../M2DO_FEA/src/stationary_study.cpp -I ../../M2DO_FEA/include  
 
 M2DO_FEA_clean:
 	rm -rfv ../../M2DO_FEA/bin/*.o
 
 clean:
-	rm -rfv bin/*.o && rm -rfv bin/a.out
+	rm -rfv bin/*.out && rm -rfv results/area_fractions/* && rm -rfv results/level_set/* && rm -rfv results/boundary_segments/* && rm -rfv results/history/*
