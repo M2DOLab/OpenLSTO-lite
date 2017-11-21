@@ -51,7 +51,7 @@ Prof. Hyunsun Alicia Kim (UCSD, Cardiff U.)
 
 Dr. Sandilya Kambampati (UCSD)
 
-Dr. Lester Hedges (Lawrence Berkeley National Lab)
+[Dr. Lester Hedges](http://lesterhedges.net)
 
 Dr. Zongliang Du (UCSD)
 
