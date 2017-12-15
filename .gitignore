@@ -3,3 +3,4 @@
 .out
 .vtk
 .txt
+M2DO_FEA/bin/*.o
