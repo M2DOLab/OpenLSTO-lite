@@ -342,9 +342,7 @@ _Scalar &Vector<_Scalar,-1>::operator () (const double indx) { // Value Retrieva
        std::cout << "\nERROR: The Vector index should be an Integer from 0 to _nElem, inclusive.\n\n";
        assert(false);
    }
-   else {
-       return data[indx];
-   }
+    return data[indx];
 }
 
 template<typename _Scalar>

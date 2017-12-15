@@ -48,7 +48,7 @@ uint Matrix<_Scalar,_Rows,_Cols>::size() const {
 }
 
 template<typename _Scalar, int _Rows, int _Cols>
-void Matrix<_Scalar,_Rows,_Cols>::print() const {
+void Matrix<_Scalar,_Rows,_Cols>::Print() const {
    std::cout << "\n [ ";
    for (uint jj = 0; jj < _Cols-1; ++jj) {
        std::cout << data[0][jj] << " , ";
@@ -330,7 +330,7 @@ uint Matrix<_Scalar,-1,-1>::size() const {
 }
 
 template<typename _Scalar>
-void Matrix<_Scalar,-1,-1>::print() const {
+void Matrix<_Scalar,-1,-1>::Print() const {
    std::cout << "\n [ ";
    for (uint jj = 0; jj < nCols-1; ++jj) {
        std::cout << data[0][jj] << " , ";
@@ -559,7 +559,8 @@ double Matrix<_Scalar,-1,-1>::determinant() {
 template<typename _Scalar>
 Matrix<_Scalar,-1,-1> Matrix<_Scalar,-1,-1>::inverse() {
    assert(this->nRows == this->nCols);
-   double detVal = this->determinant(); // determinant
+   double detVal = 0.0;
+   detVal = this->determinant(); // determinant
    Matrix<_Scalar,-1,-1> invMat;
    invMat.resize(this->nRows,this->nCols);
    switch (this->nRows) {
