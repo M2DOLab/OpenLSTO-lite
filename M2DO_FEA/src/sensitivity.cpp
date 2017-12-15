@@ -131,7 +131,6 @@ void SensitivityAnalysis :: ComputeComplianceSensitivities (bool time_it) {
 
 	// Quadrature object.
     GaussianQuadrature  quadrature (spacedim, order) ;
-
 	// FUNCTION BODY
 
     // Computing strain-displacement matrices.
@@ -149,10 +148,10 @@ void SensitivityAnalysis :: ComputeComplianceSensitivities (bool time_it) {
         // Update eta counter (to select next group of Gauss points).
         eta_count = quadrature.UpdateEtaCounter(eta_count);
     }
-
+    
 	// For each element i
     for (int i = 0; i < number_of_elements; i++)
-    {
+    { 
         // If the element is too soft (very small area fraction)
         if (study.mesh.solid_elements[i].area_fraction <= 0.1)
         {
@@ -161,7 +160,7 @@ void SensitivityAnalysis :: ComputeComplianceSensitivities (bool time_it) {
         	{
         		// Sensitivity is not computed and set as zero
         		sensitivities[i].sensitivity_at_gauss_point[j] = 0.0;
-        	}
+        	}    
         }
         // If the element has significant area fraction
         else
@@ -172,7 +171,7 @@ void SensitivityAnalysis :: ComputeComplianceSensitivities (bool time_it) {
 				// Element dofs
                 dof = study.mesh.solid_elements[i].dof ;
 
-				// Selecting element displacements.
+                // Selecting element displacements.
 				for (int k = 0 ; k < dof.size() ; k++)
 				{
 					element_displacements(k) = study.u[dof[k]] ;
@@ -181,7 +180,6 @@ void SensitivityAnalysis :: ComputeComplianceSensitivities (bool time_it) {
 				// Strain.
                 //Bu = B[j]*element_displacements;
                 Bu = B[j].dot(element_displacements);
-
 				// Sensitivities (stress*strain).
                 //stress_strain = Bu.transpose()*C*Bu;
                 Vector<double,-1> CBu;
@@ -191,7 +189,6 @@ void SensitivityAnalysis :: ComputeComplianceSensitivities (bool time_it) {
         	}
         }
     }
-
     // Objective function (compliance).
     objective = vec_vec_mult(study.f, study.u);
 
@@ -287,7 +284,6 @@ void SensitivityAnalysis :: ComputeBoundarySensitivities (vector<double> bPoint)
 
     // Solve least squares and obtain sensitivity at the boundary
     double B = SolveLeastSquares(least_squares, bPoint);
-
     // Store sensitivity
     boundary_sensitivities.push_back(B);
 

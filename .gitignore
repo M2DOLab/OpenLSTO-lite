@@ -6,4 +6,7 @@
 M2DO_FEA/bin/*.o
 M2DO_FEA/Python/build/
 M2DO_FEA/Python/cython_debug/
+M2DO_FEA/Python/*.cpp
+*.so
 *.pyc
+*.json

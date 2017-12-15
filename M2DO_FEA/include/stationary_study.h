@@ -61,7 +61,8 @@ namespace M2DO_FEA {
 			Mesh & mesh ;
 
 			std::vector<Triplet_Sparse> K_reduced; // stiffness matrix reduced
-
+			std::vector<int> K_rows, K_cols;
+			std::vector<double> K_vals;
 
 			std::vector<double> f ; // force vector
 			std::vector<double> f_reduced ; // force vector reduced

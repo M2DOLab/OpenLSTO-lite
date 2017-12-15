@@ -103,7 +103,9 @@ Matrix<double,-1,-1> SolidElement :: B (vector<double> & eta) {
 }
 
 Matrix<double,-1,-1> SolidElement :: K () {
-
+	
+	K_gpts.clear();
+	K_gpts.reserve(pow (order, spacedim));
 
 	Matrix<double,-1,-1> J_mat, J_inv, K_mat(pow(2, spacedim) * spacedim, pow(2, spacedim) * spacedim) ;
 	Matrix<double,-1,-1> C;
@@ -147,7 +149,6 @@ Matrix<double,-1,-1> SolidElement :: K () {
 		J_inv = J_mat.inverse() ;
 
 
-
 		/*
 			Build the B matrix at this gauss point:
 		*/
@@ -189,6 +190,9 @@ Matrix<double,-1,-1> SolidElement :: K () {
 		Bt = B_mat.transpose();
 		K_tmp = (Bt.dot(C.dot(B_mat)));
 		K_tmp *= (w * J_mat.determinant());
+
+		K_gpts.push_back(K_tmp);
+		
 		for(int ii = 0; ii < K_tmp.rows(); ii++) for(int jj = 0; jj < K_tmp.cols(); jj++)  K_mat(ii,jj)+= K_tmp(ii,jj);
 
 

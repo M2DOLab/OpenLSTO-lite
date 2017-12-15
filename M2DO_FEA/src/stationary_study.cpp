@@ -123,6 +123,13 @@ void StationaryStudy :: Assemble_K_With_Area_Fractions_Sparse (bool time_it) {
 	K_reduced.resize(0);
 	K_reduced.reserve(mesh.n_entries());
 
+	K_rows.resize(0,mesh.n_entries());
+	K_cols.resize(0,mesh.n_entries());
+	K_vals.resize(0,mesh.n_entries());
+	// K_rows.reserve(mesh.n_entries());
+	// K_cols.reserve(mesh.n_entries());
+	// K_vals.reserve(mesh.n_entries());
+
 	Matrix<double, -1, -1> K_e ;
 
 
@@ -147,7 +154,7 @@ void StationaryStudy :: Assemble_K_With_Area_Fractions_Sparse (bool time_it) {
 
 
 			K_e = element.K() ;
-
+		
 
 
 		}
@@ -172,13 +179,21 @@ void StationaryStudy :: Assemble_K_With_Area_Fractions_Sparse (bool time_it) {
 						Triplet_Sparse k_ij;
 				    k_ij.row = reduced_dof_i;
 				    k_ij.col = reduced_dof_j;
-				    k_ij.val = element.area_fraction *K_e (i, j);
-				    K_reduced.push_back(k_ij);
+						k_ij.val = element.area_fraction *K_e (i, j);
+						K_rows.push_back(dof[i]);
+						K_cols.push_back(dof[j]);
+						K_vals.push_back(element.area_fraction *K_e (i, j));
+						K_reduced.push_back(k_ij);
 
 					}
 
 				}
 
+			}
+			else{
+				K_rows.push_back(dof[i]);
+				K_cols.push_back(dof[i]);
+				K_vals.push_back(1.0);
 			}
 
 		}
