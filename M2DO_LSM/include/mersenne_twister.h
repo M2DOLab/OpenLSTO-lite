@@ -23,6 +23,10 @@
     random number generator class.
  */
 
+#ifdef PYBIND 
+#include "./common.h"
+#endif
+
 //! Mersenne-Twister class.
 class MersenneTwister
 {

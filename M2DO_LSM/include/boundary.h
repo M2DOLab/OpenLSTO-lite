@@ -18,6 +18,11 @@
 #ifndef _BOUNDARY_H
 #define _BOUNDARY_H
 
+#ifdef PYBIND 
+#include "./common.h"
+#include "./level_set.h"
+#endif
+
 /*! \file Boundary.h
     \brief A class for the discretised boundary.
  */
@@ -175,6 +180,8 @@ private:
     void computePointLengths();
 };
 
+#ifndef PYBIND 
 #include "../src/boundary.cpp"
+#endif
 
 #endif  /* _BOUNDARY_H */
