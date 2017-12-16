@@ -20,7 +20,7 @@ cdef class py_LSM:
     cdef Boundary *boundaryptr
 
     cdef int nNODE, nELEM
-    cdef double mesh_area, targetArea, min_area
+    cdef double mesh_area, targetArea, max_area
     cdef double moveLimit
     cdef int nBpts, ndvs
 
@@ -29,6 +29,8 @@ cdef class py_LSM:
     cdef vector[double] scale_factors
 
     cdef vector[double] displacements
+
+    cdef vector[int] isActive, isBound
 
     # GEOMETRY_RELATED FUNCTIONS ====================================+
     def __cinit__(self, int nelx, int nely, int ndvs = 2, double max_area = 0.4, double moveLimit = 0.5):
@@ -41,13 +43,13 @@ cdef class py_LSM:
         self.targetArea = max_area * nelx * nely
         self.ndvs = ndvs      
         
-    def add_holes(self, np.ndarray loc, np.ndarray[double] radius):
+    def add_holes(self, np.ndarray locx, np.ndarray locy, np.ndarray[double] radius):
         cdef Hole hole_
-        for ii in range(loc.shape[0]):
-            hole_.coord.x = loc[ii,0]
-            hole_.coord.y = loc[ii,1]
+        for ii in range(len(locx)):
+            hole_.coord.x = locx[ii]
+            hole_.coord.y = locy[ii]
             hole_.r = radius[ii]
-        self.holes.push_back(hole_)
+            self.holes.push_back(hole_)
     
     def set_levelset(self, bool isHole):
         if isHole == True:
@@ -69,7 +71,7 @@ cdef class py_LSM:
             areafraction[ee] = max([1e-3, self.meshptr.elements[ee].area])
 
         bpts_xy = np.zeros((nBpts,2))
-        segLength = np.zeros(nBpts,2)
+        segLength = np.zeros(nBpts)
 
         for bb in range(nBpts):
             bpts_xy[bb,0] = self.boundaryptr.points[bb].coord.x
@@ -84,16 +86,20 @@ cdef class py_LSM:
         return (bpts_xy, areafraction, segLength)
     
     def __isActive__(self):
-        self.isActive = np.ones(self.nBpts, dtype=int)
+        self.isActive.reserve(self.nBpts)
         for ii in range(self.nBpts):
             if self.boundaryptr.points[ii].isFixed == True:
                 self.isActive[ii] = 0
+            else:
+                self.isActive[ii] = 1
     
     def __isBound__(self):
-        self.isBound = np.ones(self.nBpts, dtype=int)
+        self.isBound.reserve(self.nBpts)
         for ii in range(self.nBpts):
             if self.boundaryptr.points[ii].isDomain == True:
-                self.isBound[ii] = 0     
+                self.isBound[ii] = 0    
+            else:
+                self.isBound[ii] = 1   
 
     def get_isActive(self):
         self.__isActive__()

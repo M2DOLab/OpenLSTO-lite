@@ -1,5 +1,6 @@
 import numpy as np
-from py_lsmBind import py_lsmBind
+import matplotlib.pyplot as plt
+from py_lsmBind import py_LSM
 
 nelx = 160
 nely = 80
@@ -30,7 +31,17 @@ hole = np.array([[16, 14, 5],
                 [48, 66, 5],
                 [80, 66, 5],
                 [112, 66, 5],
-                [144, 66, 5]])
+                [144, 66, 5]],dtype=np.float)
+
+a = py_LSM(nelx,nely)
+print(len(hole[:,0]))
+a.add_holes(locx = hole[:,0], locy = hole[:,1], radius = hole[:,2])
+
+a.set_levelset(True)
+
+(bpts_xy, areafraction, seglength) = a.discretise()
 
 
+plt.scatter(bpts_xy[:,0], bpts_xy[:,1], 10, seglength)
+plt.show()
 
