@@ -108,7 +108,7 @@ cdef class py_FEA:
         ''' CLAMPED ONLY '''
         # cdef vector[int] fixed_dof = self.__get_dof(coord,tol)
         fixed_dof = self.__get_dof(coord,tol)
-        print("# of fixed_dof: %d" %len(fixed_dof))
+        # print("# of fixed_dof: %d" %len(fixed_dof))
 
         self.diriptr = new HomogeneousDirichletBoundaryConditions(fixed_dof, self.nDOF)
         # self.diriptr.Print()
@@ -122,12 +122,12 @@ cdef class py_FEA:
     def set_force(self, np.ndarray coord, np.ndarray tol, int direction, double f):
         ''' AUTOMATICALLY OVERLAPS PREVIOUS FORCE '''
         load_dof = self.__get_dof(coord,tol)
-        print(load_dof)
+        # print(load_dof)
         load_val = np.zeros(len(load_dof))
 
         for ii in range(len(load_val)/2):
             load_val[2*ii+direction] = f  
-        print(load_val)
+        # print(load_val)
 
         self.neumannptr = new PointValues(load_dof, load_val)
         self.studyptr.AssembleF (self.neumannptr[0], False) 
