@@ -10,6 +10,7 @@ cdef extern from "../include/boundary_conditions.h" namespace "M2DO_FEA":
         vector[int] reduced_dof_to_dof_map
         vector[int] dof_to_reduced_dof_map
         void Print()
+        vector[int] dof
 
 cdef extern from "../include/boundary_conditions.h" namespace "M2DO_FEA":
     cdef cppclass PointValues:

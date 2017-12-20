@@ -27,6 +27,7 @@ cdef extern from "../include/stationary_study.h" namespace "M2DO_FEA":
 
         # temp
         void Solve_With_CG(bool, double, vector[double] &)
+        vector[double] f
         vector[double] u
 
         HomogeneousDirichletBoundaryConditions homogeneous_dirichlet_boundary_conditions

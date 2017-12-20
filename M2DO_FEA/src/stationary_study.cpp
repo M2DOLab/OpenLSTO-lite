@@ -190,11 +190,11 @@ void StationaryStudy :: Assemble_K_With_Area_Fractions_Sparse (bool time_it) {
 				}
 
 			}
-			else{
-				K_rows.push_back(dof[i]);
-				K_cols.push_back(dof[i]);
-				K_vals.push_back(1.0);
-			}
+			// else{
+			// 	K_rows.push_back(dof[i]);
+			// 	K_cols.push_back(dof[i]);
+			// 	K_vals.push_back(1.0);
+			// }
 
 		}
 

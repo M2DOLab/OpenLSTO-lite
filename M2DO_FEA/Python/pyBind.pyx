@@ -70,6 +70,8 @@ cdef class py_FEA:
     cdef int nNODE
     cdef int nDOF
     cdef int element_order
+
+    cdef vector[int] HomoBC
     # K_gpts[0].data = 
 
     def __cinit__(self, int nelx, int nely, int element_order):
@@ -111,21 +113,26 @@ cdef class py_FEA:
         self.diriptr = new HomogeneousDirichletBoundaryConditions(fixed_dof, self.nDOF)
         # self.diriptr.Print()
         self.studyptr.AddBoundaryConditions(self.diriptr[0])
+        self.HomoBC = self.studyptr.homogeneous_dirichlet_boundary_conditions.dof
         del self.diriptr
-
+    
+    def get_boundary(self):
+        return np.array(self.HomoBC)
 
     def set_force(self, np.ndarray coord, np.ndarray tol, int direction, double f):
         ''' AUTOMATICALLY OVERLAPS PREVIOUS FORCE '''
         load_dof = self.__get_dof(coord,tol)
+        print(load_dof)
         load_val = np.zeros(len(load_dof))
 
         for ii in range(len(load_val)/2):
-            load_val[2*ii+direction] = f        
+            load_val[2*ii+direction] = f  
+        print(load_val)
 
         self.neumannptr = new PointValues(load_dof, load_val)
-        # self.neumannptr.Print()
         self.studyptr.AssembleF (self.neumannptr[0], False) 
         del self.neumannptr
+        return self.studyptr.f
 
     def solve_FE(self):
         ''' temporary checkup function '''
@@ -135,22 +142,41 @@ cdef class py_FEA:
 
     def compute_K(self):
         ''' initially area_fraction is uniformly set to 1.0 '''
+        for ee in range(self.nELEM): 
+            self.meshptr.solid_elements[ee].area_fraction = 1.0
         self.studyptr.Assemble_K_With_Area_Fractions_Sparse (False) 
         cdef vector[int] rows = self.studyptr.K_rows
         cdef vector[int] cols = self.studyptr.K_cols
         cdef vector[double] vals = self.studyptr.K_vals
         return (rows, cols, vals)
 
-    def compute_K_SIMP(self,np.ndarray area_fraction):
-        for ee in range(self.nELEM): 
-            if area_fraction[ee] < 1e-3:
-                self.meshptr.solid_elements[ee].area_fraction = 1e-3
-            else:
-                self.meshptr.solid_elements[ee].area_fraction = area_fraction[ee]
-        self.studyptr.Assemble_K_With_Area_Fractions_Sparse (False) 
-        cdef vector[int] rows = self.studyptr.K_rows
-        cdef vector[int] cols = self.studyptr.K_cols
-        cdef vector[double] vals = self.studyptr.K_vals
+    def compute_K_SIMP(self,np.ndarray multiplier):
+        ''' below snippet gives out error... TOFIX'''
+        # for ee in range(self.nELEM): 
+        #     self.meshptr.solid_elements[ee].area_fraction = multiplier[ee]
+        # self.studyptr.Assemble_K_With_Area_Fractions_Sparse (False) <- BLAME!
+
+        # cdef vector[int] rows = self.studyptr.K_rows
+        # cdef vector[int] cols = self.studyptr.K_cols
+        # cdef vector[double] vals = self.studyptr.K_vals
+
+        # for ee in range(self.nELEM): 
+            # self.meshptr.solid_elements[ee].area_fraction = 1.0
+
+        cdef MatrixXd matrix8x 
+        matrix8x.resize(8,8)
+        cdef vector[int] rows, cols 
+        cdef vector[double] vals 
+        for ee in range(self.nELEM):
+            dof = np.array(self.meshptr.solid_elements[ee].dof)
+
+            matrix8x = self.meshptr.solid_elements[ee].K()
+            for ii in range(8):
+                for jj in range(8):
+                    rows.push_back(dof[ii])
+                    cols.push_back(dof[jj])
+                    vals.push_back(matrix8x.data[ii][jj] * multiplier[ee])
+        
         return (rows, cols, vals)
 
     def compute_K_SIMP_derivs(self, np.ndarray u): #np.ndarray rhos):
@@ -159,14 +185,22 @@ cdef class py_FEA:
         cdef vector[int] rows, cols 
         cdef vector[double] vals 
 
+        outflag = 0
         K_e = np.zeros((8,8),dtype = float)
         for ee in range(self.nELEM):
-            dof = self.meshptr.solid_elements[ee].dof
+            dof = np.array(self.meshptr.solid_elements[ee].dof)
             u_elem = u[dof]
+
+
             matrix8x = self.meshptr.solid_elements[ee].K()
             for mm in range(8):
                 K_e[mm,:] = matrix8x.data[mm]
             K_derivs = K_e.dot(u_elem)
+            # if outflag:
+            #     print(self.meshptr.solid_elements[ee].node_ids)
+            #     print(dof)
+            #     print(K_derivs)
+            #     outflag = 0
             for ii in range(8):
                 rows.push_back(dof[ii])
                 cols.push_back(ee)
