@@ -4,3 +4,4 @@ python LSMsetup.py build
 cp build/lib*/py_lsmBind.so ./
 
 # python test.py
+cp py_lsmBind.so ~/Dropbox/packages/topOpt_MDO/LSTO2D_test_v2

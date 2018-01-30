@@ -50,7 +50,7 @@ void Optimise::Solve_With_NewtonRaphson ()
       // target_area is the area of the structure that the optimizer will be aiming to target during this iteration
 
       lambda_g = moveLimit;
-
+    
       double fraction_area = 0.5; // delta_area will be 50 percent of maximum area
       double target_area = boundary_area;
       for(int i = 0; i<bpointsize; i++){

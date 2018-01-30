@@ -136,18 +136,35 @@ cdef class py_FEA:
 
     def solve_FE(self):
         ''' temporary checkup function '''
-        u_guess = np.zeros(self.nDOF)
+        cdef vector[double] u_guess;
+        u_guess.resize(self.nDOF,0.0);
         self.studyptr.Solve_With_CG(True, 1e-6, u_guess)
-        return self.studyptr.u
+        return u_guess
 
     def compute_K(self):
         ''' initially area_fraction is uniformly set to 1.0 '''
+        cdef vector[int] rows 
+        cdef vector[int] cols 
+        cdef vector[double] vals 
+
         for ee in range(self.nELEM): 
             self.meshptr.solid_elements[ee].area_fraction = 1.0
         self.studyptr.Assemble_K_With_Area_Fractions_Sparse (False) 
-        cdef vector[int] rows = self.studyptr.K_rows
-        cdef vector[int] cols = self.studyptr.K_cols
-        cdef vector[double] vals = self.studyptr.K_vals
+        for ii in range(self.nNODE):
+            rows.push_back(self.studyptr.K_rows[ii])
+            cols.push_back(self.studyptr.K_cols[ii])
+            vals.push_back(self.studyptr.K_vals[ii])
+        
+        for dd in range(self.HomoBC.size()):
+            rows.push_back(self.nDOF+dd)
+            cols.push_back(self.HomoBC[dd])
+            vals.push_back(1.0)
+
+        for dd in range(self.HomoBC.size()):
+            cols.push_back(self.nDOF+dd)
+            rows.push_back(self.HomoBC[dd])
+            vals.push_back(1.0)
+
         return (rows, cols, vals)
 
     def compute_K_SIMP(self,np.ndarray multiplier):
@@ -176,6 +193,16 @@ cdef class py_FEA:
                     rows.push_back(dof[ii])
                     cols.push_back(dof[jj])
                     vals.push_back(matrix8x.data[ii][jj] * multiplier[ee])
+
+        for dd in range(self.HomoBC.size()):
+            rows.push_back(self.nDOF+dd)
+            cols.push_back(self.HomoBC[dd])
+            vals.push_back(1.0)
+
+        for dd in range(self.HomoBC.size()):
+            cols.push_back(self.nDOF+dd)
+            rows.push_back(self.HomoBC[dd])
+            vals.push_back(1.0)
         
         return (rows, cols, vals)
 
@@ -231,19 +258,20 @@ cdef class py_FEA:
                 K_tmp *= params_node[gg]
 
                 for iii in range(8):
-                    reduced_dof_i = self.studyptr.homogeneous_dirichlet_boundary_conditions.dof_to_reduced_dof_map[ dof[iii] ] 
-                    if reduced_dof_i >= 0:
-                        for jjj in range(8):
-                            reduced_dof_j = self.studyptr.homogeneous_dirichlet_boundary_conditions.dof_to_reduced_dof_map[ dof[jjj] ] 
-                            if reduced_dof_j >= 0:
-                                rows.push_back(dof[iii])
-                                cols.push_back(dof[jjj])
-                                vals.push_back(K_tmp[iii,jjj])
-                    else:
+                    for jjj in range(8):
                         rows.push_back(dof[iii])
-                        cols.push_back(dof[iii])
-                        vals.push_back(1.0)
+                        cols.push_back(dof[jjj])
+                        vals.push_back(K_tmp[iii,jjj])
 
+        for dd in range(self.HomoBC.size()):
+            rows.push_back(self.nDOF+dd)
+            cols.push_back(self.HomoBC[dd])
+            vals.push_back(1.0)
+
+        for dd in range(self.HomoBC.size()):
+            cols.push_back(self.nDOF+dd)
+            rows.push_back(self.HomoBC[dd])
+            vals.push_back(1.0)
         return (rows, cols, vals)
     
     def compute_K_PARM_derivs(self, np.ndarray u):
@@ -289,7 +317,7 @@ cdef class py_FEA:
         return fixed_dof
 
     
-    cpdef get_mesh(self):
+    def get_mesh(self):
         NODE = np.zeros([self.nNODE,2],dtype=float)
         ELEM = np.zeros([self.nELEM,4],dtype=int)
 

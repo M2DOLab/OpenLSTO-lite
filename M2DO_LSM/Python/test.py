@@ -35,12 +35,14 @@ hole = np.array([[16, 14, 5],
 
 a = py_LSM(nelx,nely)
 print(len(hole[:,0]))
-a.add_holes(locx = hole[:,0], locy = hole[:,1], radius = hole[:,2])
+a.add_holes(locx = list(hole[:,0]), locy = list(hole[:,1]), radius = list(hole[:,2]))
 
-a.set_levelset(True)
+a.set_levelset()
 
 (bpts_xy, areafraction, seglength) = a.discretise()
 
+# print(areafraction)
+print(seglength)
 
 plt.scatter(bpts_xy[:,0], bpts_xy[:,1], 10, seglength)
 plt.show()

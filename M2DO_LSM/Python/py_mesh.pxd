@@ -26,6 +26,3 @@ cdef extern from "./../include/mesh.h":
 
         vector[Element] elements
         vector[Node] nodes
-
-
-    
