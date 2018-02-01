@@ -9,6 +9,8 @@ This first light version implements the M2DO lab’s level set topology optimiza
 
 Extended capabilities using externally provided software are to be included in the next, more advanced version.
 
+The level-set module of this software, M2DO_LSM, was adapted from code written by [Lester Hedges](https://github.com/lohedges/slsm), which can be found [here](https://github.com/lohedges/slsm).
+
 ## Installation
 -  Download
 
@@ -41,7 +43,7 @@ clean existing object files:
 Users of OpenLSTO need a data visualization tool to post-process solution files. The software currently supports .vtk output format natively read by [*ParaView*](https://www.paraview.org/).
 
 ## Licensing
-OpenLSTO is available for download under the [Apache V. 2.0](https://www.apache.org/licenses/LICENSE-2.0) license. Please refer to the License page for terms and conditions.
+OpenLSTO is available for download under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) license. Please refer to the License page for terms and conditions.
 
 ## Contributors
 
@@ -49,7 +51,7 @@ Prof. Hyunsun Alicia Kim (UCSD, Cardiff U.)
 
 Dr. Sandilya Kambampati (UCSD)
 
-Dr. Lester Hedges (Lawrence Berkeley National Lab)
+[Dr. Lester Hedges](http://lesterhedges.net)
 
 Dr. Zongliang Du (UCSD)
 
