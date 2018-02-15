@@ -7,6 +7,7 @@ from py_study cimport StationaryStudy, Triplet_Sparse
 from py_Sens cimport SensitivityAnalysis
 
 from libcpp.vector cimport vector
+import sys
 
 import numpy as np
 cimport numpy as np
@@ -139,8 +140,8 @@ cdef class py_FEA:
         ''' temporary checkup function '''
         cdef vector[double] u_guess;
         u_guess.resize(self.nDOF,0.0);
-        self.studyptr.Solve_With_CG(True, 1e-6, u_guess)
-        return u_guess
+        self.studyptr.Solve_With_CG(True, 1e-6, u_guess) # u_guess = dof same as u_reduced
+        return self.studyptr.u # u = dof same as global dof
 
     def compute_K(self):
         ''' initially area_fraction is uniformly set to 1.0 '''
@@ -239,12 +240,10 @@ cdef class py_FEA:
         K_e = np.zeros((8,8),dtype = float)
         for ee in range(self.nELEM):
             dof = np.array(self.meshptr.solid_elements[ee].dof)
-            u_elem = u[dof]
-
-
             matrix8x = self.meshptr.solid_elements[ee].K()
             for mm in range(8):
                 K_e[mm,:] = matrix8x.data[mm]
+            u_elem = u[dof]
             K_derivs = K_e.dot(u_elem)
             # if outflag:
             #     print(self.meshptr.solid_elements[ee].node_ids)
