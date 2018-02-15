@@ -267,12 +267,14 @@ cdef class py_FEA:
 
         cdef MatrixXd K_gpts
         K_gpts.resize(8,8)
+
         for ee in range(self.nELEM): 
-            ''' K() must be is evoked previously '''
+            ''' K() must be evoked in advance '''
             self.meshptr.solid_elements[ee].K() 
             node_ids = self.meshptr.solid_elements[ee].node_ids
             dof = self.meshptr.solid_elements[ee].dof
             params_node = parms[node_ids]
+            params_node = params_node[[0,1,3,2]]
             for gg in range(self.element_order**2):
                 K_gpts.data = self.meshptr.solid_elements[ee].K_gpts[gg].data
                 K_tmp = np.zeros((8,8)) 
@@ -323,9 +325,9 @@ cdef class py_FEA:
 
 
     def compute_K_LSTO(self, np.ndarray area_fraction):
-        cdef vector[int] rows
-        cdef vector[int] cols
-        cdef vector[double] vals
+        # cdef vector[int] rows
+        # cdef vector[int] cols
+        # cdef vector[double] vals
         (rows, cols, vals) = self.compute_K_SIMP(area_fraction)
         return (rows, cols, vals)
 
