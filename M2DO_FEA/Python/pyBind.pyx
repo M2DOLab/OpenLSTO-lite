@@ -74,17 +74,18 @@ cdef class py_FEA:
     cdef vector[int] HomoBC
     # K_gpts[0].data = 
 
-    def __cinit__(self, int nelx, int nely, int element_order):
+    def __cinit__(self, double lx, double ly, int nelx, int nely, int element_order):
         ''' NOTE THAT MESH DOF is constructed element-wise '''
         self.meshptr = new Mesh(2)        
         self.studyptr = new StationaryStudy(self.meshptr[0])
         self.element_order = element_order
 
         exy = np.array([nelx, nely])
+        lxy = np.array([lx, ly])
         cdef MatrixXd mat4x
         mat4x.resize(4,2)
         
-        M = np.array([[0,0],[nelx,0],[nelx,nely],[0,nely]])
+        M = np.array([[0,0],[lx,0],[lx,ly],[0,ly]])
         mat4x.data = M
         self.meshptr.MeshSolidHyperRectangle(exy, mat4x, element_order ) 
         self.meshptr.is_structured = True
@@ -150,7 +151,7 @@ cdef class py_FEA:
         for ee in range(self.nELEM): 
             self.meshptr.solid_elements[ee].area_fraction = 1.0
         self.studyptr.Assemble_K_With_Area_Fractions_Sparse (False) 
-        for ii in range(self.nNODE):
+        for ii in range(self.studyptr.K_rows.size()):
             rows.push_back(self.studyptr.K_rows[ii])
             cols.push_back(self.studyptr.K_cols[ii])
             vals.push_back(self.studyptr.K_vals[ii])
@@ -168,32 +169,27 @@ cdef class py_FEA:
         return (rows, cols, vals)
 
     def compute_K_SIMP(self,np.ndarray multiplier):
-        ''' below snippet gives out error... TOFIX'''
         # for ee in range(self.nELEM): 
         #     self.meshptr.solid_elements[ee].area_fraction = multiplier[ee]
-        # self.studyptr.Assemble_K_With_Area_Fractions_Sparse (False) <- BLAME!
+        # self.studyptr.Assemble_K_With_Area_Fractions_Sparse (False) 
 
         # cdef vector[int] rows = self.studyptr.K_rows
         # cdef vector[int] cols = self.studyptr.K_cols
         # cdef vector[double] vals = self.studyptr.K_vals
 
-        # for ee in range(self.nELEM): 
-            # self.meshptr.solid_elements[ee].area_fraction = 1.0
-
-        cdef MatrixXd matrix8x 
-        matrix8x.resize(8,8)
-        cdef vector[int] rows, cols 
+        cdef vector[int] rows 
+        cdef vector[int] cols 
         cdef vector[double] vals 
-        for ee in range(self.nELEM):
-            dof = np.array(self.meshptr.solid_elements[ee].dof)
 
-            matrix8x = self.meshptr.solid_elements[ee].K()
-            for ii in range(8):
-                for jj in range(8):
-                    rows.push_back(dof[ii])
-                    cols.push_back(dof[jj])
-                    vals.push_back(matrix8x.data[ii][jj] * multiplier[ee])
+        for ee in range(self.nELEM): 
+            self.meshptr.solid_elements[ee].area_fraction = multiplier[ee]
 
+        self.studyptr.Assemble_K_With_Area_Fractions_Sparse (False) 
+        for ii in range(self.studyptr.K_rows.size()):
+            rows.push_back(self.studyptr.K_rows[ii])
+            cols.push_back(self.studyptr.K_cols[ii])
+            vals.push_back(self.studyptr.K_vals[ii])
+        
         for dd in range(self.HomoBC.size()):
             rows.push_back(self.nDOF+dd)
             cols.push_back(self.HomoBC[dd])
@@ -203,6 +199,33 @@ cdef class py_FEA:
             cols.push_back(self.nDOF+dd)
             rows.push_back(self.HomoBC[dd])
             vals.push_back(1.0)
+
+        # for ee in range(self.nELEM): 
+            # self.meshptr.solid_elements[ee].area_fraction = 1.0
+
+        # cdef MatrixXd matrix8x 
+        # matrix8x.resize(8,8)
+        # cdef vector[int] rows, cols 
+        # cdef vector[double] vals 
+        # for ee in range(self.nELEM):
+        #     dof = np.array(self.meshptr.solid_elements[ee].dof)
+
+        #     matrix8x = self.meshptr.solid_elements[ee].K()
+        #     for ii in range(8):
+        #         for jj in range(8):
+        #             rows.push_back(dof[ii])
+        #             cols.push_back(dof[jj])
+        #             vals.push_back(matrix8x.data[ii][jj] * multiplier[ee])
+
+        # for dd in range(self.HomoBC.size()):
+        #     rows.push_back(self.nDOF+dd)
+        #     cols.push_back(self.HomoBC[dd])
+        #     vals.push_back(1.0)
+
+        # for dd in range(self.HomoBC.size()):
+        #     cols.push_back(self.nDOF+dd)
+        #     rows.push_back(self.HomoBC[dd])
+        #     vals.push_back(1.0)
         
         return (rows, cols, vals)
 
@@ -309,7 +332,7 @@ cdef class py_FEA:
     ''' belows are gateway functions '''    
 
     cpdef __get_dof(self, np.ndarray coord, np.ndarray tol):
-        (NODE,ELEM) = self.get_mesh()
+        (NODE,ELEM,ELEM_DOF) = self.get_mesh()
         fixedNodes = (abs(NODE[:,0]-coord[0]) < tol[0]) & (abs(NODE[:,1]-coord[1]) < tol[1])
         nid = np.where(fixedNodes == True)[0]
 
@@ -320,6 +343,7 @@ cdef class py_FEA:
     def get_mesh(self):
         NODE = np.zeros([self.nNODE,2],dtype=float)
         ELEM = np.zeros([self.nELEM,4],dtype=int)
+        ELEM_DOF = np.zeros([self.nELEM,8], dtype = int)
 
         for ii in range(0, self.nNODE):
             for pp in range(0,2):
@@ -329,8 +353,10 @@ cdef class py_FEA:
             nid = self.meshptr.solid_elements[ee].node_ids
             for pp in range(0,4):                
                 ELEM[ee,pp] = nid[pp]
+            for pp in range(8):
+                ELEM_DOF[ee,pp] = self.meshptr.solid_elements[ee].dof[pp]
 
-        return (NODE, ELEM)
+        return (NODE, ELEM, ELEM_DOF)
 
 
     

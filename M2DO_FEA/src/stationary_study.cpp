@@ -123,9 +123,9 @@ void StationaryStudy :: Assemble_K_With_Area_Fractions_Sparse (bool time_it) {
 	K_reduced.resize(0);
 	K_reduced.reserve(mesh.n_entries());
 
-	K_rows.resize(0,mesh.n_entries());
-	K_cols.resize(0,mesh.n_entries());
-	K_vals.resize(0,mesh.n_entries());
+	K_rows.resize(0);//,mesh.n_entries());
+	K_cols.resize(0);//,mesh.n_entries());
+	K_vals.resize(0.0);//,mesh.n_entries());,mesh.n_entries());
 	// K_rows.reserve(mesh.n_entries());
 	// K_cols.reserve(mesh.n_entries());
 	// K_vals.reserve(mesh.n_entries());
