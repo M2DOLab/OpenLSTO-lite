@@ -153,7 +153,7 @@ void SensitivityAnalysis :: ComputeComplianceSensitivities (bool time_it) {
     for (int i = 0; i < number_of_elements; i++)
     { 
         // If the element is too soft (very small area fraction)
-        if (study.mesh.solid_elements[i].area_fraction <= 0.1)
+        if (study.mesh.solid_elements[i].area_fraction <= 0.001)
         {
         	// For each gauss point
         	for (int j = 0; j < number_of_gauss_points; j++)
@@ -242,7 +242,7 @@ void SensitivityAnalysis :: ComputeBoundarySensitivities (vector<double> bPoint)
         else // Else element is close enough to be considered
         {
             // Check if element is inside the boundary
-            if (study.mesh.solid_elements[i].area_fraction > 0.1)
+            if (study.mesh.solid_elements[i].area_fraction > 0.001)
             {
                 // For each Gauss point of the ith element
                 for (int j = 0; j < number_of_gauss_points; j++)
