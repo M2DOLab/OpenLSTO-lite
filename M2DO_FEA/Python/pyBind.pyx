@@ -41,7 +41,7 @@ cdef class py_Sensitivity:
                 cnt += 1
         return self.gpts_xy
 
-    def comptue_boundary_sens(self, np.ndarray bpts_xy):
+    def compute_boundary_sens(self, np.ndarray bpts_xy):
         nBpts = bpts_xy.shape[0]
         bpts_sens = np.zeros((nBpts,3))
         bpts_sens[:,0] = bpts_xy[:,0]
