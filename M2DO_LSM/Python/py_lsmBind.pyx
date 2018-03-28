@@ -39,14 +39,14 @@ cdef class py_LSM:
     cdef double time_step
 
     # GEOMETRY_RELATED FUNCTIONS ====================================+
-    def __cinit__(self, int nelx, int nely, int ndvs=2, double max_area=0.4, double moveLimit=0.5):
+    def __cinit__(self, int nelx, int nely, int ndvs=2, double moveLimit=0.5,): #double max_area=0.4, ):
         self.meshptr = new Mesh(nelx, nely, False)
         self.mesh_area = nelx * nely
-        self.max_area = max_area
+        # self.max_area = max_area
         self.moveLimit = moveLimit
         self.nNODE = (nelx + 1) * (nely + 1)
         self.nELEM = (nelx) * (nely)
-        self.targetArea = max_area * nelx * nely
+        # self.targetArea = max_area * nelx * nely
         self.ndvs = ndvs
         self.isHoles = False
         self.ioptr = new InputOutput()
@@ -94,6 +94,7 @@ cdef class py_LSM:
         return (bpts_xy, areafraction, segLength)
 
     def __isActive__(self):
+        # a boolean list of active boundary points 
         self.isActive.reserve(self.nBpts)
         for ii in range(self.nBpts):
             if self.boundaryptr.points[ii].isFixed == True:
@@ -102,6 +103,7 @@ cdef class py_LSM:
                 self.isActive[ii] = 1
 
     def __isBound__(self):
+        # a boolean list of points at the LSM bound
         self.isBound.reserve(self.nBpts)
         for ii in range(self.nBpts):
             if self.boundaryptr.points[ii].isDomain == True:
@@ -162,7 +164,7 @@ cdef class py_LSM:
                     continue
                 maxSens[gg] = max(
                     [maxSens[gg], abs(self.boundaryptr.points[ii].sensitivities[gg])])
-                self.scale_factors[gg] = 1.0 / maxSens[gg]
+            self.scale_factors[gg] = 1.0 / maxSens[gg]
 
     def get_scale_factors(self):
         scale_factors = np.zeros(self.ndvs, dtype=float)
@@ -182,18 +184,14 @@ cdef class py_LSM:
         for dd in range(self.ndvs):
             for ii in range(self.nBpts):
                 if self.isActive[ii] == 1:
-                    sens = self.boundaryptr.points[ii].sensitivities[dd] / \
-                        self.scale_factors[dd]
-                    if sens > 0:
-                        minDisp = self.boundaryptr.points[ii].negativeLimit / \
-                            sens / self.scale_factors[dd]
-                        maxDisp = self.boundaryptr.points[ii].positiveLimit / \
-                            sens / self.scale_factors[dd]
+                    sens = self.boundaryptr.points[ii].sensitivities[dd] 
+                    # compute limits based on scaled sensitivities
+                    if sens > 0: 
+                        minDisp = self.boundaryptr.points[ii].negativeLimit / sens / self.scale_factors[dd]
+                        maxDisp = self.boundaryptr.points[ii].positiveLimit / sens / self.scale_factors[dd]
                     else:
-                        maxDisp = self.boundaryptr.points[ii].negativeLimit / \
-                            sens / self.scale_factors[dd]
-                        minDisp = self.boundaryptr.points[ii].positiveLimit / \
-                            sens / self.scale_factors[dd]
+                        maxDisp = self.boundaryptr.points[ii].negativeLimit / sens / self.scale_factors[dd]
+                        minDisp = self.boundaryptr.points[ii].positiveLimit / sens / self.scale_factors[dd]
 
                     positiveLambdaLimits[dd] = max(
                         [positiveLambdaLimits[dd], maxDisp])
@@ -203,13 +201,49 @@ cdef class py_LSM:
         if (negativeLambdaLimits[0] == 0):
             negativeLambdaLimits[0] = -1e-2;
 
+        ''' NOTE: in the current application, a scaling by gradient w.r.t. lambda is ignored:
+            this may generate problem as initial lambdas are at the origin (0.0): see the last lines of computeScaleFactors() ''' 
+
         return (negativeLambdaLimits, positiveLambdaLimits)
 
-    def solve_with_openLSTO(self):
+    def _get_Lambda_Limits(self):
+        negativeLambdaLimits = np.zeros(self.ndvs)
+        positiveLambdaLimits = np.zeros(self.ndvs)
+        # cdef vector[double] negativeLambdaLimits
+        # negativeLambdaLimits.reserve(self.ndvs)
+        # cdef vector[double] positiveLambdaLimits
+        # positiveLambdaLimits.reserve(self.ndvs)
+
+        for dd in range(self.ndvs):
+            for ii in range(self.nBpts):
+                if self.isActive[ii] == 1:
+                    sens = self.boundaryptr.points[ii].sensitivities[dd] 
+                    # compute limits based on scaled sensitivities
+                    if sens > 0: 
+                        minDisp = self.boundaryptr.points[ii].negativeLimit / sens #/ self.scale_factors[dd]
+                        maxDisp = self.boundaryptr.points[ii].positiveLimit / sens #/ self.scale_factors[dd]
+                    else:
+                        maxDisp = self.boundaryptr.points[ii].negativeLimit / sens #/ self.scale_factors[dd]
+                        minDisp = self.boundaryptr.points[ii].positiveLimit / sens #/ self.scale_factors[dd]
+
+                    positiveLambdaLimits[dd] = max(
+                        [positiveLambdaLimits[dd], maxDisp])
+                    negativeLambdaLimits[dd] = min(
+                        [negativeLambdaLimits[dd], minDisp])
+
+        if (negativeLambdaLimits[0] == 0):
+            negativeLambdaLimits[0] = -1e-2;
+
+        ''' NOTE: in the current application, a scaling by gradient w.r.t. lambda is ignored:
+            this may generate problem as initial lambdas are at the origin (0.0): see the last lines of computeScaleFactors() ''' 
+
+        return (negativeLambdaLimits, positiveLambdaLimits)
+
+    def solve_with_openLSTO(self, np.ndarray constraint_distance):
         self.optimiseptr = new Optimise(self.boundaryptr.points, self.time_step, self.moveLimit)
         cdef vector[double] constraint_distances
-        constraint_distances.push_back( 
-            self.mesh_area * self.max_area - self.boundaryptr.area)
+        # constraint_distances.push_back( (self.mesh_area * self.max_area) - self.boundaryptr.area)
+        constraint_distances.push_back(constraint_distance)
 
         self.optimiseptr.length_x = self.meshptr.width
         self.optimiseptr.length_y = self.meshptr.height
@@ -219,9 +253,102 @@ cdef class py_LSM:
 
         self.optimiseptr.Solve_With_NewtonRaphson()
 
+    def compute_displacement(self, np.ndarray[double] lambdas, ):
+        # scaled displacement
+        displacement = np.zeros(self.nBpts)
+        for dd in range(self.nBpts):
+            if (self.isActive[dd]):
+                for pp in range(self.ndvs):
+                    displacement[dd] += lambdas[pp] * (self.boundaryptr.points[dd].sensitivities[pp] * self.scale_factors[pp])
+                if self.isBound[dd]:
+                    if displacement[dd] < self.boundaryptr.points[dd].negativeLimit:
+                        displacement[dd] = self.boundaryptr.points[dd].negativeLimit
+
+        return displacement
+
+    def compute_unscaledDisplacement(self, np.ndarray[double] lambdas):
+        displacement = np.zeros(self.nBpts)
+        for dd in range(self.nBpts):
+            if (self.isActive[dd]):
+                for pp in range(self.ndvs):
+                    displacement[dd] += lambdas[pp] * (self.boundaryptr.points[dd].sensitivities[pp])
+                if self.isBound[dd]:
+                    if displacement[dd] < self.boundaryptr.points[dd].negativeLimit:
+                        displacement[dd] = self.boundaryptr.points[dd].negativeLimit
+
+        return displacement
+
+    def compute_delF(self, np.ndarray displacements):
+        func = 0.
+        for dd in range(self.nBpts):
+            if self.isActive[dd]:
+                func += self.scale_factors[0] * displacements[dd] * self.boundaryptr.points[dd].sensitivities[0] * self.boundaryptr.points[dd].length
+        return func
+
+    def compute_delG(self, np.ndarray displacements, np.ndarray scaled_constraintDistance, int index = 1):
+        func = 0.
+        for dd in range(self.nBpts):
+            if self.isActive[dd]:
+                func += self.scale_factors[index] * displacements[dd] * self.boundaryptr.points[dd].sensitivities[index] * self.boundaryptr.points[dd].length
+        return func - scaled_constraintDistance[index-1] * self.scale_factors[index]
+            
+    def compute_scaledConstraintDistance(self, np.ndarray constraintDistance):
+        movemin = 0.0
+        movemax = 0.0 
+        scaled_constraintDistance = np.zeros(self.ndvs-1) 
+        
+        for qq in range(self.ndvs-1):
+            scaled_constraintDistance[qq] = constraintDistance[qq]
+            for dd in range(self.nBpts):
+                if self.isActive[dd]:
+                    if self.boundaryptr.points[dd].sensitivities[qq+1] > 0:
+                        movemin += self.boundaryptr.points[dd].sensitivities[qq+1] * self.boundaryptr.points[dd].length * self.boundaryptr.points[dd].negativeLimit
+                        movemax += self.boundaryptr.points[dd].sensitivities[qq+1] * self.boundaryptr.points[dd].length * self.boundaryptr.points[dd].positiveLimit
+                    else:
+                        movemax += self.boundaryptr.points[dd].sensitivities[qq+1] * self.boundaryptr.points[dd].length * self.boundaryptr.points[dd].negativeLimit
+                        movemin += self.boundaryptr.points[dd].sensitivities[qq+1] * self.boundaryptr.points[dd].length * self.boundaryptr.points[dd].positiveLimit
+                
+            movemin *= 0.2
+            movemax *= 0.2
+
+            if constraintDistance[qq] < 0:
+                if constraintDistance[qq] < movemin:
+                    scaled_constraintDistance[qq] = movemin 
+            else:
+                if constraintDistance[qq] > movemax:
+                    scaled_constraintDistance[qq] = movemax
+
+        return scaled_constraintDistance
+            
+    def _compute_scaledConstraintDistance(self, constraintDistance, Cg):
+        movemin = 0.0
+        movemax = 0.0 
+        
+        scaled_constraintDistance = constraintDistance
+        for dd in range(self.nBpts):
+            if self.isActive[dd]:
+                if Cg[dd] > 0:
+                    movemin += Cg[dd] * self.boundaryptr.points[dd].negativeLimit
+                    movemax += Cg[dd] * self.boundaryptr.points[dd].positiveLimit
+                else:
+                    movemax += Cg[dd] * self.boundaryptr.points[dd].negativeLimit
+                    movemin += Cg[dd] * self.boundaryptr.points[dd].positiveLimit
+            
+        movemin *= 0.2
+        movemax *= 0.2
+
+        if constraintDistance < 0:
+            if constraintDistance < movemin:
+                scaled_constraintDistance = movemin 
+        else:
+            if constraintDistance > movemax:
+                scaled_constraintDistance = movemax
+
+        return scaled_constraintDistance
+        
     '''
-    def get_segments(self):
-        pass
+    # def get_segments(self):
+    #     pass
 
     def get_active_mtx(self):
         pass
@@ -238,13 +365,18 @@ cdef class py_LSM:
         constraint_distances.push_back(self.targetArea - self.boundaryptr.area)
         return constraint_distances
     '''
-
+    
     # UPDATING_RELATED FUNCTIONS ====================================
-    def advect(self):
+    def set_boundaryVelocities(self, np.ndarray[double] bptsVel):
+        for bb in range(self.nBpts):
+            self.boundaryptr.points[bb].velocity = bptsVel[bb]
+        
+    def advect(self, np.ndarray[double] bptsVel, double time_step):
         cdef MersenneTwister rng
-        self.levelsetptr.computeVelocities(self.boundaryptr.points, self.time_step, 0, rng)
+        self.set_boundaryVelocities(bptsVel)
+        self.levelsetptr.computeVelocities(self.boundaryptr.points) #, time_step, 0, rng)
         self.levelsetptr.computeGradients()
-        self.levelsetptr.update(self.time_step)
+        self.levelsetptr.update(time_step)
     
     def reinitialise(self):
         self.levelsetptr.reinitialise()        
@@ -264,3 +396,8 @@ cdef class py_LSM:
         # self.ioptr.saveLevelSetVTK (n_iterations, self.levelsetptr[0], False, False, "results/level_set") ;
         self.ioptr.saveAreaFractionsVTK (n_iterations, self.meshptr[0], "results/area_fractions") ;
         self.ioptr.saveBoundarySegmentsTXT (n_iterations, self.boundaryptr[0], "results/boundary_segments") ;
+
+# cdef class py_SLP:
+#     cef Mesh *meshptr 
+#     cdef LevelSet *levelsetptr 
+#     cdef Boundary *boudnaryptr 

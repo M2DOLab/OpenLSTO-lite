@@ -18,6 +18,7 @@ cdef extern from "./../include/common.h":
         bool isDomain
         bool isFixed
         vector[double] sensitivities
+        double velocity;
 
     cdef cppclass BoundarySegment:
         double length
