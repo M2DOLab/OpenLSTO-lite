@@ -3,6 +3,13 @@ all: 	bin/main.o ../../M2DO_FEA/bin/quadrature.o ../../M2DO_FEA/bin/linear_shape
 		$(CXX) -std=c++14 -O3 -fopenmp -o bin/a.out bin/main.o ../../M2DO_FEA/bin/quadrature.o ../../M2DO_FEA/bin/linear_shape_function.o ../../M2DO_FEA/bin/node.o ../../M2DO_FEA/bin/solid_element.o ../../M2DO_FEA/bin/solid_material.o ../../M2DO_FEA/bin/mesh.o ../../M2DO_FEA/bin/boundary_conditions.o ../../M2DO_FEA/bin/sensitivity.o ../../M2DO_FEA/bin/stationary_study.o
 
 bin/main.o: main.cpp
+		mkdir -p ../../M2DO_FEA/bin;
+		mkdir -p ../../M2DO_LSM/bin; 
+		mkdir -p bin;
+		mkdir -p results/history;
+		mkdir -p results/area_fractions;
+		mkdir -p results/level_set;
+		mkdir -p results/boundary_segments;
 		$(CXX) -std=c++14 -O3 -w -c -o bin/main.o main.cpp -I ../../M2DO_FEA/include -I ../../M2DO_LSM/include -I ../../vendor/matvec/
 
 ../../M2DO_FEA/bin/quadrature.o: ../../M2DO_FEA/src/quadrature.cpp
