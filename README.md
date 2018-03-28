@@ -1,4 +1,6 @@
 # OpenLSTO
+[![Build Status](https://travis-ci.org/chungh6y/OpenLSTO.svg?branch=Travis)](https://travis-ci.org/chungh6y/OpenLSTO)
+
 **Open Source Code for Level Set Topology Optimization**
 
 OpenLSTO is an open-source software for level set based structural topology optimization, written in C++, developed and Maintained by researchers at UC San Diego and Cardiff University.
