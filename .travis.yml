@@ -11,5 +11,5 @@ addons:
             - g++-5
 before_install: sudo apt-get update -qq
 
-script: cd projects/compliance_minimization/ && mkdir bin/ && make 
+script: mkdir M2DO_FEA/bin && mkdir M2DO_LSM/bin && cd projects/compliance_minimization/ && mkdir bin/ && make 
 
