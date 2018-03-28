@@ -48,9 +48,10 @@ namespace M2DO_FEA {
 			vector<int> node_ids, dof ;
 			Mesh & mesh ; // The mesh to which this element belongs.
 			int material_id ;
-			double area_fraction ;
+			double area_fraction = 1.0;
 			vector<double> centroid ;
 
+			std::vector<Matrix<double, -1, -1>> K_gpts;
 			LinearShapeFunction linear_shape_function ;
 			GaussianQuadrature  quadrature ;
 

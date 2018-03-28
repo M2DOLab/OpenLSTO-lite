@@ -23,7 +23,7 @@ class Matrix { // Static-sized
    uint rows() const; // get nRows
    uint cols() const; // get nCols
    uint size() const; // nRows * nCols
-   void print() const;
+   void Print() const;
 
    Matrix<_Scalar,_Cols,_Rows> transpose(); // transpose of the self
    double determinant(); // determinant, 2x2, 3x3 only
@@ -85,7 +85,7 @@ class Matrix<_Scalar,-1,-1> { // Dynamic-sized
    uint rows() const; // get nRows
    uint cols() const; // get nCols
    uint size() const; // nRows * nCols
-   void print() const;
+   void Print() const;
 
    Matrix<_Scalar,-1,-1> transpose(); // transpose of the self
    double determinant(); // determinant, 2x2, 3x3 only

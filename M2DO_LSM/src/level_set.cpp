@@ -19,6 +19,10 @@
     \brief A class for the level set function.
  */
 
+#ifdef PYBIND
+#include "./../include/level_set.h"
+#endif
+
 LevelSet::LevelSet(Mesh& mesh_, double moveLimit_, unsigned int bandWidth_, bool isFixed_) :
     moveLimit(moveLimit_),
     mesh(mesh_),

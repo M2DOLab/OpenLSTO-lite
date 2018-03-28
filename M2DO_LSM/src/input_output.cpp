@@ -18,7 +18,9 @@
 /*! \file InputOutput.cpp
     \brief A class for reading and writing data.
  */
-
+#ifdef PYBIND
+#include "./../include/input_output.h"
+#endif
 InputOutput::InputOutput() {}
 
 void InputOutput::saveLevelSetVTK(const unsigned int& datapoint, const LevelSet& levelSet,
