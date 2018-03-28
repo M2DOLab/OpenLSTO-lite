@@ -1,8 +1,13 @@
 sudo: required
 language: cpp
 dist: trusty
+
 compiler: g++
 install: export CXX="g++-5"
+
+notifications:
+  email: false
+
 addons:
     apt:
         sources:
@@ -25,5 +30,4 @@ script:
   - make 
 
 after_success:
-  - ./bin/a.out > log.txt
-  - cat log.txt | tail
+  - ./bin/a.out
