@@ -313,7 +313,7 @@ template<typename _OtherScalar, int _OtherElem>
 double Vector<_Scalar,-1>::dot(Vector<_OtherScalar,_OtherElem> rhs) {
    double dot_ = 0.0;
    for (uint ii = 0; ii < data.size(); ++ii) {
-       dot_ += data[ii]*rhs(ii);
+       dot_ += data[ii]*rhs.data[ii];
    }
    return dot_;
 }

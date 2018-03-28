@@ -33,6 +33,8 @@ Execution
 Clean existing compilation files:
 > make clean
 
+clean existing object files:
+> make M2DO_FEA_clean 
 
 - External dependency
 
