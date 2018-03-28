@@ -9,11 +9,18 @@ addons:
             - ubuntu-toolchain-r-test
         packages:
             - g++-5
+
 before_install: 
   - sudo apt-get update -qq
   - mkdir M2DO_FEA/bin 
   - mkdir M2DO_LSM/bin
   - mkdir projects/compliance_minimization/bin
+
 script: 
+  - cd projects/compliance_minimization
   - make 
+
+after_install:
+  - ./bin/a.out > log.txt
+  - cat log.txt | tail
 
