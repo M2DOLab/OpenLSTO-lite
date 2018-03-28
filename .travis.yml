@@ -1,3 +1,6 @@
 language: cpp
 
 script: cd projects/compliance_minimization/ && make
+
+compiler: g++
+install: export CXX="g++-5"
