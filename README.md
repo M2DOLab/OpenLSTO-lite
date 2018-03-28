@@ -1,5 +1,5 @@
 # OpenLSTO
-[![Build Status](https://travis-ci.org/travis-ci/docs-travis-ci-com.svg?branch=master)](https://travis-ci.org/travis-ci/docs-travis-ci-com)
+[![Build Status](https://travis-ci.org/chungh6y/OpenLSTO.svg?branch=Travis)](https://travis-ci.org/chungh6y/OpenLSTO)
 
 **Open Source Code for Level Set Topology Optimization**
 
