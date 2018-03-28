@@ -15,6 +15,7 @@ before_install:
   - mkdir M2DO_FEA/bin 
   - mkdir M2DO_LSM/bin
   - mkdir projects/compliance_minimization/bin
+  - mkdir projects/compliance_minimization/results
 
 script: 
   - cd projects/compliance_minimization
@@ -23,4 +24,3 @@ script:
 after_success:
   - ./bin/a.out > log.txt
   - cat log.txt | tail
-
