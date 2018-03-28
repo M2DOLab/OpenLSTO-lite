@@ -1,15 +1,15 @@
+sudo: required
 language: cpp
-
-compiler: gcc
 dist: trusty
-
-#before_install: 
-#    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-#    - sudo apt-get update -qq
-      
-# install:
-#    - sudo apt-get install -qq g++-6
-#    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
+compiler: g++
+install: export CXX="g++-5"
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - g++-5
+before_install: sudo apt-get update -qq
 
 script: cd projects/compliance_minimization/ && make
 

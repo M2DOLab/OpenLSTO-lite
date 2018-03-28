@@ -1,6 +1,9 @@
 
 all: 	bin/main.o ../../M2DO_FEA/bin/quadrature.o ../../M2DO_FEA/bin/linear_shape_function.o ../../M2DO_FEA/bin/node.o ../../M2DO_FEA/bin/solid_element.o ../../M2DO_FEA/bin/solid_material.o ../../M2DO_FEA/bin/mesh.o ../../M2DO_FEA/bin/boundary_conditions.o ../../M2DO_FEA/bin/sensitivity.o ../../M2DO_FEA/bin/stationary_study.o
 		g++ -std=c++14 -O3 -fopenmp -o bin/a.out bin/main.o ../../M2DO_FEA/bin/quadrature.o ../../M2DO_FEA/bin/linear_shape_function.o ../../M2DO_FEA/bin/node.o ../../M2DO_FEA/bin/solid_element.o ../../M2DO_FEA/bin/solid_material.o ../../M2DO_FEA/bin/mesh.o ../../M2DO_FEA/bin/boundary_conditions.o ../../M2DO_FEA/bin/sensitivity.o ../../M2DO_FEA/bin/stationary_study.o
+		
+Travis: 	bin/main.o ../../M2DO_FEA/bin/quadrature.o ../../M2DO_FEA/bin/linear_shape_function.o ../../M2DO_FEA/bin/node.o ../../M2DO_FEA/bin/solid_element.o ../../M2DO_FEA/bin/solid_material.o ../../M2DO_FEA/bin/mesh.o ../../M2DO_FEA/bin/boundary_conditions.o ../../M2DO_FEA/bin/sensitivity.o ../../M2DO_FEA/bin/stationary_study.o
+		$(CXX) -std=c++14 -O3 -fopenmp -o bin/a.out bin/main.o ../../M2DO_FEA/bin/quadrature.o ../../M2DO_FEA/bin/linear_shape_function.o ../../M2DO_FEA/bin/node.o ../../M2DO_FEA/bin/solid_element.o ../../M2DO_FEA/bin/solid_material.o ../../M2DO_FEA/bin/mesh.o ../../M2DO_FEA/bin/boundary_conditions.o ../../M2DO_FEA/bin/sensitivity.o ../../M2DO_FEA/bin/stationary_study.o
 
 bin/main.o: main.cpp
 		g++ -std=c++14 -O3 -w -c -o bin/main.o main.cpp -I ../../M2DO_FEA/include -I ../../M2DO_LSM/include -I ../../vendor/matvec/
@@ -34,6 +37,7 @@ bin/main.o: main.cpp
 
 M2DO_FEA_clean:
 	rm -rfv ../../M2DO_FEA/bin/*.o
+
 
 clean:
 	rm -rfv bin/*.out && rm -rfv bin/main.o && rm -rfv results/area_fractions/* && rm -rfv results/level_set/* && rm -rfv results/boundary_segments/* && rm -rfv results/history/*
