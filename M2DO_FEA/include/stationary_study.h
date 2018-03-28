@@ -61,7 +61,8 @@ namespace M2DO_FEA {
 			Mesh & mesh ;
 
 			std::vector<Triplet_Sparse> K_reduced; // stiffness matrix reduced
-
+			std::vector<int> K_rows, K_cols;
+			std::vector<double> K_vals;
 
 			std::vector<double> f ; // force vector
 			std::vector<double> f_reduced ; // force vector reduced
@@ -81,7 +82,7 @@ namespace M2DO_FEA {
 				K = (grad v, c * grad u)_omega
 			*/
 
-			void AssembleKWithAreaFractions (bool time_it) ;
+			// void AssembleKWithAreaFractions (bool time_it) ;
 			void AssembleF (PointValues &, bool time_it) ;
 			void Assemble_K_With_Area_Fractions_Sparse (bool time_it) ;
 			void Solve_With_CG (bool time_it, double cg_tolerence, std::vector<double> &u_guess);// Solves [K_reduced] * {u_reduced} = {f_reduced}.

@@ -18,6 +18,14 @@
 #ifndef _LEVELSET_H
 #define _LEVELSET_H
 
+#ifdef PYBIND
+#include "./common.h"
+#include "./hole.h"
+#include "./mesh.h"
+#include "./mersenne_twister.h"
+#include "./fast_marching_method.h"
+#endif
+
 /*! \file LevelSet.h
     \brief A class for the level set function.
  */
@@ -343,6 +351,8 @@ private:
     int isLeftOfLine(const Coord&, const Coord&, const Coord&) const;
 };
 
+#ifndef PYBIND
 #include "../src/level_set.cpp"
+#endif
 
 #endif  /* _LEVELSET_H */

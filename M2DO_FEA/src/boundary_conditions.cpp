@@ -21,8 +21,12 @@ void HomogeneousDirichletBoundaryConditions :: Print () {
 	cout << "HomogeneousDirichletBoundaryConditions ( " ;
 	cout << "dof = " ;
 	// print_vector(dof) ;
+	
+	for (std::vector<int>::iterator it = dof.begin(); it != dof.end(); it++){
+		std::cout << *it << "\t";
+	}
+	
 	cout << " )" ;
-
 }
 
 bool HomogeneousDirichletBoundaryConditions :: Includes (int dof_in) {
@@ -148,9 +152,15 @@ void PointValues :: Print () {
 
 	cout << "PointValues ( " ;
 	cout << "dof = " ;
+	for (std::vector<int>::iterator it = dof.begin(); it != dof.end(); it++){
+		std::cout << *it << "\t";
+	}
 	// print_vector(dof) ;
 	cout << ", values = " ;
 	// print_vector(values) ;
+	for (std::vector<double>::iterator it = values.begin(); it != values.end(); it++){
+		std::cout << *it << "\t";
+	}
 	cout << " )" ;
 
 }

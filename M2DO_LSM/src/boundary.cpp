@@ -19,6 +19,10 @@
     \brief A class for the discretised boundary.
  */
 
+#ifdef PYBIND 
+#include "../include/boundary.h"
+#endif
+
 Boundary::Boundary(LevelSet& levelSet_) : levelSet(levelSet_)
 {
 }

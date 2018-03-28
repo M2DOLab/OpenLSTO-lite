@@ -18,6 +18,25 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#ifdef PYBIND
+#include <random>
+#include <algorithm>
+#include <functional>
+#include <limits>
+#include <stdlib.h>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <cmath>
+#include <cstdlib>
+#include <iostream>
+
+// #include "debug.h"
+// #include "min_unit.h"
+
+#endif
+
 /*! \file Common.h
     \brief Common data types.
  */

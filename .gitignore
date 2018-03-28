@@ -1,3 +1,16 @@
 .DS_Store
 .o
 .out
+.vtk
+.txt
+M2DO_FEA/bin/*.o
+M2DO_LSM/bin/*.o
+M2DO_FEA/Python/build/
+M2DO_LSM/Python/build/
+M2DO_FEA/Python/cython_debug/
+M2DO_LSM/Python/cython_debug/
+M2DO_FEA/Python/*.cpp
+M2DO_LSM/Python/*.cpp
+*.so
+*.pyc
+*.json

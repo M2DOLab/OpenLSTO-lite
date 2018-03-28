@@ -240,7 +240,7 @@ int main () {
 
 	double       max_time = 6000 ;   // maximum running time.
 	int    max_iterations = 300 ;    // maximum number of iterations.
-	double       max_area = 0.5 ;    // maximum material area.
+	double       max_area = 0.4 ;    // maximum material area.
 	double       max_diff = 0.0001 ; // relative difference between iterations must be less than this value to reach convergence.
 
 	/*
