@@ -1,9 +1,15 @@
 language: cpp
 
-compiler: g++
+compiler: gcc
 dist: trusty
 
-install: export CXX="g++-5"
+#before_install: 
+#    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+#    - sudo apt-get update -qq
+      
+# install:
+#    - sudo apt-get install -qq g++-6
+#    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
 
 script: cd projects/compliance_minimization/ && make
 
