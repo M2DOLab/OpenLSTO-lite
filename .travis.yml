@@ -20,7 +20,7 @@ script:
   - cd projects/compliance_minimization
   - make 
 
-after_install:
+after_success:
   - ./bin/a.out > log.txt
   - cat log.txt | tail
 
