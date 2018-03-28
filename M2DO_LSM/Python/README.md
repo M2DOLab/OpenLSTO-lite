@@ -1,4 +1,4 @@
-This is a Python Wrapper for OpenLSTO::FEA
+This is a Python Wrapper for OpenLSTO::LSM
 
 # Prerequisite
 
@@ -6,7 +6,7 @@ This is a Python Wrapper for OpenLSTO::FEA
 2. Python with Cython library (Anaconda dist. is recommended)
 
 # Build of .so file 
-python FEAsetup.py build
+python LSMsetup.py build
 
 # USAGE
 Work in progress
