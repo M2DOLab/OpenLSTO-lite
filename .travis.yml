@@ -1,3 +1,3 @@
 language: cpp
 
-script: cd projects/compliance minimizaqtion/make
+script: cd projects/compliance_minimization/ && make
