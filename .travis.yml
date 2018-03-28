@@ -11,5 +11,5 @@ addons:
             - g++-5
 before_install: sudo apt-get update -qq
 
-script: cd projects/compliance_minimization/ && make
+script: cd projects/compliance_minimization/ && make Travis
 
