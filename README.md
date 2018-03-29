@@ -30,7 +30,7 @@ Compile & Build:
 > make 
 
 Execution
-> ./a.out
+> ./bin/a.out
 
 Clean existing compilation files:
 > make clean
