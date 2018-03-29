@@ -31,3 +31,4 @@ script:
 
 after_success:
   - ./bin/a.out
+  - diff -s -q ./results/history/history.txt ./history_reference.txt
