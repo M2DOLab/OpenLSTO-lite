@@ -18,6 +18,9 @@
 #ifndef _MESH_H
 #define _MESH_H
 
+#ifdef PYBIND
+#include "./../include/hole.h"
+#endif
 /*! \file Mesh.h
     \brief A class for the level-set domain fixed-grid mesh.
  */
@@ -217,6 +220,8 @@ private:
     void initialiseNeighbours(unsigned int, unsigned int, unsigned int);
 };
 
+#ifndef PYBIND
 #include "../src/mesh.cpp"
+#endif
 
 #endif  /* _MESH_H */

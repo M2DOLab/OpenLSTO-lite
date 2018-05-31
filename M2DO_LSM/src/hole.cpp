@@ -18,6 +18,9 @@
 /*! \file Hole.cpp
     \brief A simple circular hole data type.
  */
+#ifdef PYBIND
+#include "./../include/hole.h"
+#endif
 
 Hole::Hole() {}
 

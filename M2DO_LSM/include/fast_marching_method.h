@@ -20,6 +20,13 @@
 #ifndef _FASTMARCHINGMETHOD_H
 #define _FASTMARCHINGMETHOD_H
 
+#ifdef PYBIND
+#include "./common.h"
+#include "./debug.h"
+#include "./mesh.h"
+#include "./heap.h"
+#endif
+
 /*! \file FastMarchingMethod.h
     \brief An implementation of the Fast Marching Method.
  */
@@ -163,6 +170,8 @@ private:
     const double maxDouble = std::numeric_limits<double>::max();
 };
 
+#ifndef PYBIND
 #include "../src/fast_marching_method.cpp"
+#endif
 
 #endif  /* _FASTMARCHINGMETHOD_H */

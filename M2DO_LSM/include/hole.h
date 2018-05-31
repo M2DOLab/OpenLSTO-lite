@@ -18,6 +18,9 @@
 #ifndef _HOLE_H
 #define _HOLE_H
 
+#ifdef PYBIND
+#include "./common.h"
+#endif
 /*! \file Hole.h
     \brief A simple circular hole data type.
  */
@@ -57,6 +60,8 @@ public:
     double r;
 };
 
+#ifndef PYBIND
 #include "../src/hole.cpp"
+#endif
 
 #endif  /* _HOLE_H */

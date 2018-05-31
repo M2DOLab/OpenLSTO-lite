@@ -28,9 +28,12 @@ double get_cpu_time(){
 
 }
 
-int main () {
+int main (int argc, char *argv[]) {
 
-	/////////////////////////////////////////////////////////////////////////////
+    string logfilename = "log.txt";
+
+    INPUTS inputs = read_inputs(argv[1]);
+    /////////////////////////////////////////////////////////////////////////////
 	//                                                                         //
 	//                SETTINGS FOR THE FINITE ELEMENT ANALYSIS                 //
 	//                                                                         //
@@ -44,8 +47,8 @@ int main () {
 	FEA::Mesh fea_mesh (2) ;
 
 	// Number of elements in x and y directions:
-	const unsigned int nelx = 160, nely = 80 ;
-
+	const unsigned int nelx = inputs.lxy[0], nely = inputs.lxy[1];
+	
 	// fea_box contains the (x,y) coordinates of 4 corner points of rectangle containing the mesh:
   	Matrix<double, -1, -1> fea_box (4, 2) ;
 
@@ -66,9 +69,9 @@ int main () {
 		Define material properties and add to mesh:
 	*/
 
-	double   E = 1.0 ; // Young's Modulus
-	double  nu = 0.3 ; // Poisson's ratio
-	double rho = 1.0 ; // Density
+	double   E = inputs.E; // Young's Modulus
+	double  nu = inputs.nu ; // Poisson's ratio
+	double rho = inputs.rho ; // Density
 
 	fea_mesh.solid_materials.push_back (FEA::SolidMaterial (2, E, nu, rho)) ;
 
@@ -86,9 +89,42 @@ int main () {
 	// Example 1: cantilever beam
 
 	// Select dof using a box centered at coord of size tol:
-	vector<double>    coord = {0.0, 0.0}, tol = {1e-12, 1e10} ;
-	vector<int> fixed_nodes = fea_mesh.GetNodesByCoordinates (coord, tol) ;
-	vector<int>   fixed_dof = fea_mesh.dof (fixed_nodes) ;
+	// vector<double>    coord = {0.0, 0.0}, tol = {1e-12, 1e10} ;
+	// vector<int> fixed_nodes = fea_mesh.GetNodesByCoordinates (coord, tol) ;
+	// vector<int>   fixed_dof = fea_mesh.dof (fixed_nodes) ;
+
+	vector<double> coord, tol;
+	vector<int> directions;
+	vector<int> fixed_nodes;
+	vector<int> fixed_dof;
+
+	for (unsigned int cc = 0; cc < inputs.n_BC; cc++){
+		coord = inputs.BC_locs[cc];
+		tol = inputs.BC_tols[cc];
+		switch (inputs.BC_dircs[cc]){
+			case 0:
+				directions.push_back(0);
+				break;
+			case 1:
+				directions.push_back(1);
+				break;
+			case 2:
+				directions.push_back(0);
+				directions.push_back(1);
+				break;
+			default:
+				cout << "no Dirichlet BC is specified\n";
+				break;
+		}
+		fixed_nodes = fea_mesh.GetNodesByCoordinates(coord, tol);
+		vector<int> tmp_dofs = fea_mesh.dof(fixed_nodes, directions);
+		fixed_dof.insert(fixed_dof.end(), tmp_dofs.begin(), tmp_dofs.end());
+
+		coord.clear();
+		tol.clear();
+		directions.clear();
+	}
+
 
  	// Example 2: half of simply supported beam or MBB beam
 
@@ -118,17 +154,53 @@ int main () {
 	*/
 
 	// Example 1: cantilever beam
+	vector<double> values;
+	vector<int> load_node;
+	vector<int> load_dof;
+	vector<double> load_val;
+	FEA::PointValues point_load;
 
 	// Select dof using a box centered at coord of size tol:
-	coord = {1.0*nelx, 0.5*nely}, tol = {1e-12, 1e-12} ;
-	vector<int> load_node = fea_mesh.GetNodesByCoordinates (coord, tol) ;
-	vector<int>  load_dof = fea_mesh.dof (load_node) ;
+	for (unsigned int cc = 0; cc < inputs.n_loads; cc++){
+		coord = inputs.load_locs[cc];
+		tol = inputs.load_tols[cc];
+		switch (inputs.load_dircs[cc]){
+			case 0:
+				directions.push_back(0);
+				break;
+			case 1:
+				directions.push_back(1);
+				break;
+			case 2:
+				directions.push_back(0);
+				directions.push_back(1);
+				break;
+			default:
+				cout << "no load is specified\n";
+				break;
+		}
+		load_node = fea_mesh.GetNodesByCoordinates(coord,tol);
+		vector<int> tmp_dofs2 = fea_mesh.dof(load_node, directions);
+		load_dof.insert(load_dof.end(), tmp_dofs2.begin(), tmp_dofs2.end());
+		point_load.dof = load_dof;
+		for (int qq = 0; qq < load_dof.size(); qq++)
+			values.push_back(inputs.load_vals[cc]);
+		point_load.values = values;
+		fea_study.AssembleF (point_load, false) ;
 
-	vector<double> load_val (load_node.size() * 2) ;
-	for (int i = 0 ; i < load_node.size() ; ++i) {
-		load_val[2*i]   = 0.00 ; // load component in x direction.
-		load_val[2*i+1] = -0.5 ; // load component in y direction.
+		coord.clear();
+		tol.clear();
+		directions.clear();
 	}
+	// coord = {1.0*nelx, 0.5*nely}, tol = {1e-12, 1e-12} ;
+	// vector<int> load_node = fea_mesh.GetNodesByCoordinates (coord, tol) ;
+	// vector<int>  load_dof = fea_mesh.dof (load_node) ;
+
+	// vector<double> load_val (load_node.size() * 2) ;
+	// for (int i = 0 ; i < load_node.size() ; ++i) {
+	// 	load_val[2*i]   = 0.00 ; // load component in x direction.
+	// 	load_val[2*i+1] = -0.5 ; // load component in y direction.
+	// }
 
 	// Example 2: half of simply supported beam or MBB beam
 
@@ -143,8 +215,8 @@ int main () {
 	// }
 
 	// Add point load to study and assemble load vector {f}:
-	FEA::PointValues point_load (load_dof, load_val) ;
-	fea_study.AssembleF (point_load, false) ;
+	// FEA::PointValues point_load (load_dof, load_val) ;
+	// fea_study.AssembleF (point_load, false) ;
 
 	/*
 		FEA Solver:
@@ -180,7 +252,7 @@ int main () {
 		Define LSM parameters:
 	*/
 
-	double    move_limit = 0.5 ;   // Maximum displacement per iteration in units of the mesh spacing.
+	double    move_limit = inputs.move_limit ;   // Maximum displacement per iteration in units of the mesh spacing.
 	double    band_width = 6 ;     // Width of the narrow band.
 	bool is_fixed_domain = false ; // Whether or not the domain boundary is fixed.
 
@@ -192,38 +264,40 @@ int main () {
 
 	vector<LSM::Hole> holes ;
 
-	// First row with five holes:
-	holes.push_back (LSM::Hole (16, 14, 5)) ;
-	holes.push_back (LSM::Hole (48, 14, 5)) ;
-	holes.push_back (LSM::Hole (80, 14, 5)) ;
-	holes.push_back (LSM::Hole (112, 14, 5)) ;
-	holes.push_back (LSM::Hole (144, 14, 5)) ;
+	for (unsigned int cc = 0; cc < inputs.n_holes ; cc++)
+		holes.push_back(LSM::Hole(inputs.hole_locs[cc][0],inputs.hole_locs[cc][1], inputs.hole_sizes[cc]));
+	// // First row with five holes:
+	// holes.push_back (LSM::Hole (16, 14, 5)) ;
+	// holes.push_back (LSM::Hole (48, 14, 5)) ;
+	// holes.push_back (LSM::Hole (80, 14, 5)) ;
+	// holes.push_back (LSM::Hole (112, 14, 5)) ;
+	// holes.push_back (LSM::Hole (144, 14, 5)) ;
 
-	// Second row with four holes:
-	holes.push_back (LSM::Hole (32, 27, 5)) ;
-	holes.push_back (LSM::Hole (64, 27, 5)) ;
-	holes.push_back (LSM::Hole (96, 27, 5)) ;
-	holes.push_back (LSM::Hole (128, 27, 5)) ;
+	// // Second row with four holes:
+	// holes.push_back (LSM::Hole (32, 27, 5)) ;
+	// holes.push_back (LSM::Hole (64, 27, 5)) ;
+	// holes.push_back (LSM::Hole (96, 27, 5)) ;
+	// holes.push_back (LSM::Hole (128, 27, 5)) ;
 
-	// Third row with five holes:
-	holes.push_back (LSM::Hole (16, 40, 5)) ;
-	holes.push_back (LSM::Hole (48, 40, 5)) ;
-	holes.push_back (LSM::Hole (80, 40, 5)) ;
-	holes.push_back (LSM::Hole (112, 40, 5)) ;
-	holes.push_back (LSM::Hole (144, 40, 5)) ;
+	// // Third row with five holes:
+	// holes.push_back (LSM::Hole (16, 40, 5)) ;
+	// holes.push_back (LSM::Hole (48, 40, 5)) ;
+	// holes.push_back (LSM::Hole (80, 40, 5)) ;
+	// holes.push_back (LSM::Hole (112, 40, 5)) ;
+	// holes.push_back (LSM::Hole (144, 40, 5)) ;
 
-	// Fourth row with four holes:
-	holes.push_back (LSM::Hole (32, 53, 5)) ;
-	holes.push_back (LSM::Hole (64, 53, 5)) ;
-	holes.push_back (LSM::Hole (96, 53, 5)) ;
-	holes.push_back (LSM::Hole (128, 53, 5)) ;
+	// // Fourth row with four holes:
+	// holes.push_back (LSM::Hole (32, 53, 5)) ;
+	// holes.push_back (LSM::Hole (64, 53, 5)) ;
+	// holes.push_back (LSM::Hole (96, 53, 5)) ;
+	// holes.push_back (LSM::Hole (128, 53, 5)) ;
 
-	// Fifth row with five holes:
-	holes.push_back (LSM::Hole (16, 66, 5)) ;
-	holes.push_back (LSM::Hole (48, 66, 5)) ;
-	holes.push_back (LSM::Hole (80, 66, 5)) ;
-	holes.push_back (LSM::Hole (112, 66, 5)) ;
-	holes.push_back (LSM::Hole (144, 66, 5)) ;
+	// // Fifth row with five holes:
+	// holes.push_back (LSM::Hole (16, 66, 5)) ;
+	// holes.push_back (LSM::Hole (48, 66, 5)) ;
+	// holes.push_back (LSM::Hole (80, 66, 5)) ;
+	// holes.push_back (LSM::Hole (112, 66, 5)) ;
+	// holes.push_back (LSM::Hole (144, 66, 5)) ;
 
 	// END OF SETTINGS FOR THE LEVEL SET METHOD
 
@@ -240,7 +314,7 @@ int main () {
 
 	double       max_time = 6000 ;   // maximum running time.
 	int    max_iterations = 300 ;    // maximum number of iterations.
-	double       max_area = 0.4 ;    // maximum material area.
+	double       max_area = inputs.max_area ;    // maximum material area.
 	double       max_diff = 0.0001 ; // relative difference between iterations must be less than this value to reach convergence.
 
 	/*

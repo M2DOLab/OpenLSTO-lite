@@ -21,6 +21,10 @@
     \brief An implementation of a heap data structure (binary tree).
  */
 
+#ifdef PYBIND
+#include "./../include/heap.h"
+#endif
+
 Heap::Heap(unsigned int maxLength_, bool isTest_) :
     maxLength(maxLength_),
     isTest(isTest_)

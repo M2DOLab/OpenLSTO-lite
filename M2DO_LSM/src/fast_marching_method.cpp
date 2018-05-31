@@ -20,6 +20,10 @@
 /*! \file FastMarchingMethod.cpp
     \brief An implementation of the Fast Marching Method.
  */
+#ifdef PYBIND
+#include "./../include/fast_marching_method.h"
+#endif
+
 
 FastMarchingMethod::FastMarchingMethod(const Mesh& mesh_, bool isTest_) :
     mesh(mesh_),

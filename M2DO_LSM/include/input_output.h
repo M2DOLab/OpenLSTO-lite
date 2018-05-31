@@ -21,6 +21,12 @@
 /*! \file InputOutput.h
     \brief A class for reading and writing data.
  */
+#ifdef PYBIND
+#include "./common.h"
+#include "./level_set.h"
+#include "./boundary.h"
+#include "./mesh.h"
+#endif
 
 //! A class for reading and writing data.
 class InputOutput
@@ -191,6 +197,8 @@ public:
     void WriteOptimisationHistoryTXT(std::vector<double>, std::vector<std::vector<double> >);
 };
 
+#ifndef PYBIND
 #include "../src/input_output.cpp"
+#endif
 
 #endif  /* _INPUTOUTPUT_H */

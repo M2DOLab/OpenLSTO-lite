@@ -19,6 +19,10 @@
     \brief A class for the level-set domain fixed-grid mesh.
  */
 
+#ifdef PYBIND 
+#include "./../include/mesh.h"
+#endif
+
 Mesh::Mesh(unsigned int width_,
            unsigned int height_,
            bool isPeriodic_) :

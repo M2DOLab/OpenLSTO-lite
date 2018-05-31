@@ -1,0 +1,34 @@
+sudo: required
+language: cpp
+dist: trusty
+
+compiler: g++
+install: export CXX="g++-5"
+
+notifications:
+  email: false
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - g++-5
+
+before_install: 
+  - sudo apt-get update -qq
+  - mkdir M2DO_FEA/bin 
+  - mkdir M2DO_LSM/bin
+  - mkdir projects/compliance_minimization/bin
+  - mkdir -p projects/compliance_minimization/results/history
+  - mkdir projects/compliance_minimization/results/area_fractions
+  - mkdir projects/compliance_minimization/results/level_set
+  - mkdir projects/compliance_minimization/results/boundary_segments
+
+script: 
+  - cd projects/compliance_minimization
+  - make 
+
+after_success:
+  - ./bin/a.out
+  - diff -s -q ./results/history/history.txt ./history_reference.txt

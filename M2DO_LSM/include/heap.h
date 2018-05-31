@@ -20,6 +20,12 @@
 #ifndef _HEAP_H
 #define _HEAP_H
 
+#ifdef PYBIND
+#include "./common.h"
+#include "./debug.h"
+#endif
+
+
 /*! \file Heap.h
     \brief An implementation of a heap data structure (binary tree).
  */
@@ -145,6 +151,8 @@ private:
     bool isTest;
 };
 
+#ifndef PYBIND
 #include "../src/heap.cpp"
+#endif
 
 #endif  /* _HEAP_H */
