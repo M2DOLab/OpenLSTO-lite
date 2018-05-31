@@ -143,3 +143,11 @@ void Optimise::Solve_With_NewtonRaphson ()
 
 
 }
+
+void Optimise::get_lambdas(std::vector<double> &lambdas) {
+
+  lambdas.clear();
+  lambdas.push_back(-lambda_f);
+  lambdas.push_back(-lambda_g);
+
+}

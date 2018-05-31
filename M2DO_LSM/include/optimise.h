@@ -22,6 +22,8 @@ public:
 
     void Solve_With_NewtonRaphson(); // function to calculate lambda_f
 
+    void get_lambdas(std::vector<double> &lambdas);
+
 private:
     /// The number of boundary points.
     unsigned int nPoints;
