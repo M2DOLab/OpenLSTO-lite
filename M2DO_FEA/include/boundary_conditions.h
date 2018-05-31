@@ -58,6 +58,7 @@ namespace M2DO_FEA {
 			vector<double> values ;
 
 			// Methods:
+			PointValues(){};
 			PointValues (vector<int> & dofs_in, vector<double> & values_in) ;
 			void Print () ;
 

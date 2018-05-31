@@ -16,6 +16,7 @@
 
 #include "../../vendor/matvec/MatrixM2DO.h"
 #include "../../vendor/matvec/VectorM2DO.h"
+#include "../../vendor/parser/inputParser.h"
 
 using namespace std ;
 
@@ -29,6 +30,8 @@ using namespace std ;
 #include "boundary_conditions.h"
 #include "stationary_study.h"
 #include "sensitivity.h"
+
+
 
 
 #endif
