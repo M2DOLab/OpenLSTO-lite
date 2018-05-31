@@ -196,37 +196,37 @@ int main () {
 	vector<LSM::Hole> holes ;
 
 	// First row with five holes:
-	holes.push_back (LSM::Hole (16, 14, 5)) ;
-	holes.push_back (LSM::Hole (48, 14, 5)) ;
-	holes.push_back (LSM::Hole (80, 14, 5)) ;
-	holes.push_back (LSM::Hole (112, 14, 5)) ;
-	holes.push_back (LSM::Hole (144, 14, 5)) ;
+	// holes.push_back (LSM::Hole (16, 14, 5)) ;
+	// holes.push_back (LSM::Hole (48, 14, 5)) ;
+	// holes.push_back (LSM::Hole (80, 14, 5)) ;
+	// holes.push_back (LSM::Hole (112, 14, 5)) ;
+	// holes.push_back (LSM::Hole (144, 14, 5)) ;
 
-	// Second row with four holes:
-	holes.push_back (LSM::Hole (32, 27, 5)) ;
-	holes.push_back (LSM::Hole (64, 27, 5)) ;
-	holes.push_back (LSM::Hole (96, 27, 5)) ;
-	holes.push_back (LSM::Hole (128, 27, 5)) ;
+	// // Second row with four holes:
+	// holes.push_back (LSM::Hole (32, 27, 5)) ;
+	// holes.push_back (LSM::Hole (64, 27, 5)) ;
+	// holes.push_back (LSM::Hole (96, 27, 5)) ;
+	// holes.push_back (LSM::Hole (128, 27, 5)) ;
 
-	// Third row with five holes:
-	holes.push_back (LSM::Hole (16, 40, 5)) ;
-	holes.push_back (LSM::Hole (48, 40, 5)) ;
-	holes.push_back (LSM::Hole (80, 40, 5)) ;
-	holes.push_back (LSM::Hole (112, 40, 5)) ;
-	holes.push_back (LSM::Hole (144, 40, 5)) ;
+	// // Third row with five holes:
+	// holes.push_back (LSM::Hole (16, 40, 5)) ;
+	// holes.push_back (LSM::Hole (48, 40, 5)) ;
+	// holes.push_back (LSM::Hole (80, 40, 5)) ;
+	// holes.push_back (LSM::Hole (112, 40, 5)) ;
+	// holes.push_back (LSM::Hole (144, 40, 5)) ;
 
-	// Fourth row with four holes:
-	holes.push_back (LSM::Hole (32, 53, 5)) ;
-	holes.push_back (LSM::Hole (64, 53, 5)) ;
-	holes.push_back (LSM::Hole (96, 53, 5)) ;
-	holes.push_back (LSM::Hole (128, 53, 5)) ;
+	// // Fourth row with four holes:
+	// holes.push_back (LSM::Hole (32, 53, 5)) ;
+	// holes.push_back (LSM::Hole (64, 53, 5)) ;
+	// holes.push_back (LSM::Hole (96, 53, 5)) ;
+	// holes.push_back (LSM::Hole (128, 53, 5)) ;
 
-	// Fifth row with five holes:
-	holes.push_back (LSM::Hole (16, 66, 5)) ;
-	holes.push_back (LSM::Hole (48, 66, 5)) ;
-	holes.push_back (LSM::Hole (80, 66, 5)) ;
-	holes.push_back (LSM::Hole (112, 66, 5)) ;
-	holes.push_back (LSM::Hole (144, 66, 5)) ;
+	// // Fifth row with five holes:
+	// holes.push_back (LSM::Hole (16, 66, 5)) ;
+	// holes.push_back (LSM::Hole (48, 66, 5)) ;
+	// holes.push_back (LSM::Hole (80, 66, 5)) ;
+	// holes.push_back (LSM::Hole (112, 66, 5)) ;
+	// holes.push_back (LSM::Hole (144, 66, 5)) ;
 
 	// END OF SETTINGS FOR THE LEVEL SET METHOD
 
@@ -311,11 +311,11 @@ int main () {
     vector <M2DO_LSM::h_Node> h_Nsens_Temp(lsm_mesh.nNodes);
     vector <M2DO_LSM::h_Element> h_Esens(lsm_mesh.nElements);
     int h_count = 0;
-    double holeCFL = 0.05;
+    double holeCFL = 0.15;
     double lBand = 2.0;
     double h; // Size of level set element max (width, height)
     double h_bar;  // artifitial height for setting secondary level set function 
-    bool h_flag = true;  //
+    bool h_flag = false;  //
     bool isHole = true; // Is hole inseration function active?
     double newHoleAreaLimit = 0.02;
     //
@@ -422,6 +422,10 @@ int main () {
 		// Perform the optimisation
 		optimise.Solve_With_NewtonRaphson () ;
 
+		optimise.get_lambdas(lambdas);
+		// lambdas[0] = 0.1 * lambdas[0];
+		// lambdas[1] = 0.1 * lambdas[1];
+
 	    ///////////////////////////////////////////////////////////////////////////
 
 
@@ -454,189 +458,192 @@ int main () {
         //                                                                         //
         /////////////////////////////////////////////////////////////////////////////
         std::vector<double> signedDistance_temp(lsm_mesh.nNodes);
-        if (isHole) {
+        if (n_iterations > 5) {
 
-            //
-            // Step 1.
-            //
+        	if (isHole) {
 
-            h_count = hole_map(lsm_mesh, level_set, h, lBand, h_index, h_elem);
+	            //
+	            // Step 1.
+	            //
 
-            //
-            // Step 3. Compute node sensitivities using least squares method
-            //
+	            h_count = hole_map(lsm_mesh, level_set, h, lBand, h_index, h_elem);
 
-            // 3.1 Extrapolate nodal sensitvities from sensitivites for gauss points
-            for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
-                vector<double> nPoint (2, 0);
-                nPoint[0] = lsm_mesh.nodes[inode].coord.x;
-                nPoint[1] = lsm_mesh.nodes[inode].coord.y;
+	            //
+	            // Step 3. Compute node sensitivities using least squares method
+	            //
 
-                // Interpolate Node Point sensitivities by least squares.
-                // sens.ComputeBoundarySensitivities(radius, nPoint) ;
-                sens.ComputeBoundarySensitivities(nPoint) ;
+	            // 3.1 Extrapolate nodal sensitvities from sensitivites for gauss points
+	            for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
+	                vector<double> nPoint (2, 0);
+	                nPoint[0] = lsm_mesh.nodes[inode].coord.x;
+	                nPoint[1] = lsm_mesh.nodes[inode].coord.y;
 
-                // Assign sensitivities.
-                h_Nsens_Temp[inode].sensitivities.resize(2); 
-                fill(h_Nsens_Temp[inode].sensitivities.begin(), h_Nsens_Temp[inode].sensitivities.end(), 0.0);
+	                // Interpolate Node Point sensitivities by least squares.
+	                // sens.ComputeBoundarySensitivities(radius, nPoint) ;
+	                sens.ComputeBoundarySensitivities(nPoint) ;
 
-                h_Nsens_Temp[inode].sensitivities[0] = -sens.boundary_sensitivities[inode] ;
-                h_Nsens_Temp[inode].sensitivities[1] = -1 ;
-            }
-            // clearing sens.boundarysens vector.
-            sens.boundary_sensitivities.clear() ;
+	                // Assign sensitivities.
+	                h_Nsens_Temp[inode].sensitivities.resize(2); 
+	                fill(h_Nsens_Temp[inode].sensitivities.begin(), h_Nsens_Temp[inode].sensitivities.end(), 0.0);
 
-            // 3.2 Calculate element sensitivities
-            for (int iel = 0; iel < lsm_mesh.nElements; iel++ ) {
+	                h_Nsens_Temp[inode].sensitivities[0] = -sens.boundary_sensitivities[inode] ;
+	                h_Nsens_Temp[inode].sensitivities[1] = -1 ;
+	            }
+	            // clearing sens.boundarysens vector.
+	            sens.boundary_sensitivities.clear() ;
 
-                h_Esens[iel].sensitivities.resize(2); 
-                fill(h_Esens[iel].sensitivities.begin(), h_Esens[iel].sensitivities.end(), 0.0);
-                for (int ind = 0; ind < 4; ind++) {
-                    int inode;
-                    inode = lsm_mesh.elements[iel].nodes[ind];
-                    h_Esens[iel].sensitivities[0] += 0.25 * h_Nsens_Temp[inode].sensitivities[0];
-                    h_Esens[iel].sensitivities[1] += 0.25 * h_Nsens_Temp[inode].sensitivities[1];
-                }
+	            // 3.2 Calculate element sensitivities
+	            for (int iel = 0; iel < lsm_mesh.nElements; iel++ ) {
 
-            }
-            // 3.3 Update nodal sensitivities
-            // clear nodal sensitivity value
-            for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
-                h_Nsens[inode].sensitivities.resize(2); 
-                fill(h_Nsens[inode].sensitivities.begin(), h_Nsens[inode].sensitivities.end(), 0.0);
-            } 
-            // re-assign nodal sensitivity value based on calculatd element sensitivities
-            for (int iel = 0; iel < lsm_mesh.nElements; iel++ ) {
-                for (int ind = 0; ind < 4; ind++) {
-                    int inode;
-                    inode = lsm_mesh.elements[iel].nodes[ind];
-                    h_Nsens[inode].sensitivities[0] += 0.25 * h_Esens[iel].sensitivities[0];
-                    h_Nsens[inode].sensitivities[1] += 0.25 * h_Esens[iel].sensitivities[1];
-                }
-            }
+	                h_Esens[iel].sensitivities.resize(2); 
+	                fill(h_Esens[iel].sensitivities.begin(), h_Esens[iel].sensitivities.end(), 0.0);
+	                for (int ind = 0; ind < 4; ind++) {
+	                    int inode;
+	                    inode = lsm_mesh.elements[iel].nodes[ind];
+	                    h_Esens[iel].sensitivities[0] += 0.25 * h_Nsens_Temp[inode].sensitivities[0];
+	                    h_Esens[iel].sensitivities[1] += 0.25 * h_Nsens_Temp[inode].sensitivities[1];
+	                }
 
-            if (h_flag) {              
-                //
-                // Step 2. Initialise the secondary level set function after inserting new holes 
-                // 
-                h_lsf.resize(lsm_mesh.nNodes); fill(h_lsf.begin(), h_lsf.end(), h_bar);//}
-                get_h_lsf( lsm_mesh.nNodes, h_index, h_Nsens, lambdas, h_lsf );
-                //initialise_hole_lsf(lsm_mesh, h_count, holeCFL, level_set, moveLimit, h_index, h_elem, h_Nsens, h_lsf, lambdas);
-                h_flag = false;
-            } else { 
-                //
-                // Step 4. Update existing h_lsf when new hole has not yet been activated. 
-                //
-                get_h_lsf( lsm_mesh.nNodes, h_index, h_Nsens, lambdas, h_lsf );
-                //
-                // Step 5. Check whether new holes should be inserted
-                //
-                int inserted_hole_nodes = 0;
-                for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
-                    if ( (h_index[inode] ==1) && (h_lsf[inode] < 0) ) { 
-                        if (!h_flag) {
-                            cout << "\n\n--------------------------------------------\n";
-                            cout << "  Hole will be inserted at ";
-                        }
-                        h_flag = true; 
-                        inserted_hole_nodes ++;
-                        //cout<< "\n" << inode << "\t" << h_lsf[inode] << "\t" << level_set.signedDistance[inode];
-                     }
-                }
-                // counting hole_area secondary
-                double area_h_lsf, area_lsf;
-                area_h_lsf = LSM::Boundary_hole(level_set, &h_lsf).computeAreaFractions();
-                area_lsf   = LSM::Boundary_hole(level_set, &level_set.signedDistance).computeAreaFractions();
+	            }
+	            // 3.3 Update nodal sensitivities
+	            // clear nodal sensitivity value
+	            for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
+	                h_Nsens[inode].sensitivities.resize(2); 
+	                fill(h_Nsens[inode].sensitivities.begin(), h_Nsens[inode].sensitivities.end(), 0.0);
+	            } 
+	            // re-assign nodal sensitivity value based on calculatd element sensitivities
+	            for (int iel = 0; iel < lsm_mesh.nElements; iel++ ) {
+	                for (int ind = 0; ind < 4; ind++) {
+	                    int inode;
+	                    inode = lsm_mesh.elements[iel].nodes[ind];
+	                    h_Nsens[inode].sensitivities[0] += 0.25 * h_Esens[iel].sensitivities[0];
+	                    h_Nsens[inode].sensitivities[1] += 0.25 * h_Esens[iel].sensitivities[1];
+	                }
+	            }
 
-                printf("\nThe area fraction corresponding to lsf and h_lsf are: %8.2f %8.2f %8.2f\n", boundary.area, area_lsf, area_h_lsf) ;
+	            if (h_flag) {              
+	                //
+	                // Step 2. Initialise the secondary level set function after inserting new holes 
+	                // 
+	                h_lsf.resize(lsm_mesh.nNodes); fill(h_lsf.begin(), h_lsf.end(), h_bar);//}
+	                get_h_lsf( lsm_mesh.nNodes, h_index, h_Nsens, lambdas, h_lsf );
+	                //initialise_hole_lsf(lsm_mesh, h_count, holeCFL, level_set, moveLimit, h_index, h_elem, h_Nsens, h_lsf, lambdas);
+	                h_flag = false;
+	            } else { 
+	                //
+	                // Step 4. Update existing h_lsf when new hole has not yet been activated. 
+	                //
+	                get_h_lsf( lsm_mesh.nNodes, h_index, h_Nsens, lambdas, h_lsf );
+	                //
+	                // Step 5. Check whether new holes should be inserted
+	                //
+	                int inserted_hole_nodes = 0;
+	                for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
+	                    if ( (h_index[inode] ==1) && (h_lsf[inode] < 0) ) { 
+	                        if (!h_flag) {
+	                            cout << "\n\n--------------------------------------------\n";
+	                            cout << "  Hole will be inserted at ";
+	                        }
+	                        h_flag = true; 
+	                        inserted_hole_nodes ++;
+	                        //cout<< "\n" << inode << "\t" << h_lsf[inode] << "\t" << level_set.signedDistance[inode];
+	                     }
+	                }
+	                // counting hole_area secondary
+	                double area_h_lsf, area_lsf;
+	                area_h_lsf = LSM::Boundary_hole(level_set, &h_lsf).computeAreaFractions();
+	                area_lsf   = LSM::Boundary_hole(level_set, &level_set.signedDistance).computeAreaFractions();
 
-                //cout << "\n\nNumber of nodes to be set as new hole nodes: " << inserted_hole_nodes << endl;                
-                
-                //
-                // Step 6. Copy values of secondary level set function to primaray level set function
-                //
-                io.saveLevelSetVTK(9000, level_set) ;
+	                printf("\nThe area fraction corresponding to lsf and h_lsf are: %8.2f %8.2f %8.2f\n", boundary.area, area_lsf, area_h_lsf) ;
 
-                if (h_flag) {
+	                //cout << "\n\nNumber of nodes to be set as new hole nodes: " << inserted_hole_nodes << endl;                
+	                
+	                //
+	                // Step 6. Copy values of secondary level set function to primaray level set function
+	                //
+	                io.saveLevelSetVTK(9000, level_set) ;
 
-                    //
-                    // 6.1 Check whether new holes' area exceeds a certain threshold
-                    //
+	                if (h_flag) {
 
-                    double hole_areafraction = (mesh_area- area_h_lsf)/area_lsf;
-                    // Find minimum of h_lsf
-                    double temp_min_h_lsf = 1.0;
-                    if (hole_areafraction > newHoleAreaLimit) {
-                        for (int inode = 0; inode < lsm_mesh.nNodes; inode++) {
-                            temp_min_h_lsf = (temp_min_h_lsf < h_lsf[inode]) ? temp_min_h_lsf : h_lsf[inode];
-                        }
-                    }
-                    while (hole_areafraction > newHoleAreaLimit) {
+	                    //
+	                    // 6.1 Check whether new holes' area exceeds a certain threshold
+	                    //
 
-                        cout << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
-                        cout << "     Too much material is removed. \n";
-                        cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-                        
-                        // move up h_lsf untill the limit of the area of new holes to be inserted meeting the requirement
-                        for (int inode = 0; inode < lsm_mesh.nNodes; inode++) {
-                            h_lsf[inode] = h_lsf[inode] - 0.005*temp_min_h_lsf;
-                        }
-                        area_h_lsf = LSM::Boundary_hole(level_set, &h_lsf).computeAreaFractions();
-                        hole_areafraction = (mesh_area- area_h_lsf)/area_lsf;
-                    }
+	                    double hole_areafraction = (mesh_area- area_h_lsf)/area_lsf;
+	                    // Find minimum of h_lsf
+	                    double temp_min_h_lsf = 1.0;
+	                    if (hole_areafraction > newHoleAreaLimit) {
+	                        for (int inode = 0; inode < lsm_mesh.nNodes; inode++) {
+	                            temp_min_h_lsf = (temp_min_h_lsf < h_lsf[inode]) ? temp_min_h_lsf : h_lsf[inode];
+	                        }
+	                    }
+	                    while (hole_areafraction > newHoleAreaLimit) {
 
-                    //
-                    // 6.2 Update primary level set function to insert new holes
-                    //
-                    signedDistance_temp.clear(); double min_h_lsf = 1.0, min_lsf = 1.0;
-                    for (int inode = 0; inode < lsm_mesh.nNodes; inode++) {
-                        // signedDistance_temp[inode] = level_set.signedDistance[inode];
-                        if ( (h_index[inode] ==1) && (hole_areafraction>1e-3)) {
-                            //if (h_lsf[inode] < level_set.signedDistance[inode]) {
-                             if ((h_lsf[inode]<=h_bar) && (h_lsf[inode] < level_set.signedDistance[inode])) {
-                                level_set.signedDistance[inode] = h_lsf[inode];
-                            }
-                        }
-                        signedDistance_temp[inode] = level_set.signedDistance[inode];
-                        min_h_lsf = (min_h_lsf < h_lsf[inode]) ? min_h_lsf : h_lsf[inode];
-                        min_lsf = (min_lsf < level_set.signedDistance[inode]) ? min_lsf : level_set.signedDistance[inode];
-                    }
-                    cout <<"\n\nMininal primary and secondary LSF: " << min_h_lsf << "\t" << min_lsf << endl;
-                }
-                //
-                // Step 7. Use fast marching method to re-initialise signed distance function
-                //
-                if (h_flag) {
+	                        cout << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+	                        cout << "     Too much material is removed. \n";
+	                        cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	                        
+	                        // move up h_lsf untill the limit of the area of new holes to be inserted meeting the requirement
+	                        for (int inode = 0; inode < lsm_mesh.nNodes; inode++) {
+	                            h_lsf[inode] = h_lsf[inode] - 0.005*temp_min_h_lsf;
+	                        }
+	                        area_h_lsf = LSM::Boundary_hole(level_set, &h_lsf).computeAreaFractions();
+	                        hole_areafraction = (mesh_area- area_h_lsf)/area_lsf;
+	                    }
 
-                    // for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
-                    //     level_set.signedDistance[inode] = h_lsf[inode];
-                    // }
-                    // cout << "\nThe area fraction corresponding to h_lsf is [new] : " << LSM::Boundary_hole(level_set,&h_lsf).computeAreaFractions() << endl;
-                    // io.savelevel_setVTK(9001, level_set) ;
+	                    //
+	                    // 6.2 Update primary level set function to insert new holes
+	                    //
+	                    signedDistance_temp.clear(); double min_h_lsf = 1.0, min_lsf = 1.0;
+	                    for (int inode = 0; inode < lsm_mesh.nNodes; inode++) {
+	                        // signedDistance_temp[inode] = level_set.signedDistance[inode];
+	                        if ( (h_index[inode] ==1) && (hole_areafraction>1e-3)) {
+	                            //if (h_lsf[inode] < level_set.signedDistance[inode]) {
+	                             if ((h_lsf[inode]<=h_bar) && (h_lsf[inode] < level_set.signedDistance[inode])) {
+	                                level_set.signedDistance[inode] = h_lsf[inode];
+	                            }
+	                        }
+	                        signedDistance_temp[inode] = level_set.signedDistance[inode];
+	                        min_h_lsf = (min_h_lsf < h_lsf[inode]) ? min_h_lsf : h_lsf[inode];
+	                        min_lsf = (min_lsf < level_set.signedDistance[inode]) ? min_lsf : level_set.signedDistance[inode];
+	                    }
+	                    cout <<"\n\nMininal primary and secondary LSF: " << min_h_lsf << "\t" << min_lsf << endl;
+	                }
+	                //
+	                // Step 7. Use fast marching method to re-initialise signed distance function
+	                //
+	                if (h_flag) {
 
-                    // for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
-                    //     level_set.signedDistance[inode] = signedDistance_temp[inode];
-                    // }
-                    // io.savelevel_setVTK(9002, level_set) ;
+	                    // for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
+	                    //     level_set.signedDistance[inode] = h_lsf[inode];
+	                    // }
+	                    // cout << "\nThe area fraction corresponding to h_lsf is [new] : " << LSM::Boundary_hole(level_set,&h_lsf).computeAreaFractions() << endl;
+	                    // io.savelevel_setVTK(9001, level_set) ;
 
-                    // // boundary_hole2.computeAreaFractions() ;
-                    // cout << "\nThe area fraction corresponding to lsf before stretching is: " << LSM::Boundary_hole(level_set,&level_set.signedDistance).computeAreaFractions() << endl;
+	                    // for (int inode = 0; inode < lsm_mesh.nNodes; inode++ ) {
+	                    //     level_set.signedDistance[inode] = signedDistance_temp[inode];
+	                    // }
+	                    // io.savelevel_setVTK(9002, level_set) ;
 
-                    M2DO_LSM::FastMarchingMethod fmm(lsm_mesh, false);
-                    fmm.march(level_set.signedDistance);
+	                    // // boundary_hole2.computeAreaFractions() ;
+	                    // cout << "\nThe area fraction corresponding to lsf before stretching is: " << LSM::Boundary_hole(level_set,&level_set.signedDistance).computeAreaFractions() << endl;
 
-                    // io.savelevel_setVTK(9003, level_set) ;
-                    
-                    // cout << "\nhe area fraction corresponding to lsf after stretching is: " << LSM::Boundary_hole(level_set,&level_set.signedDistance).computeAreaFractions() << endl;
+	                    M2DO_LSM::FastMarchingMethod fmm(lsm_mesh, false);
+	                    fmm.march(level_set.signedDistance);
 
-                }
+	                    // io.savelevel_setVTK(9003, level_set) ;
+	                    
+	                    // cout << "\nhe area fraction corresponding to lsf after stretching is: " << LSM::Boundary_hole(level_set,&level_set.signedDistance).computeAreaFractions() << endl;
 
-            }
+	                }
 
-            if (h_flag) { cout << "\n--------------------------------------------\n\n"; }
+	            }
+
+	            if (h_flag) { cout << "\n--------------------------------------------\n\n"; }
+	        }
+
         }
-
-
+	        
 
 		////////////////////////////////////////////////////////////////////////////
 
