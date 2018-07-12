@@ -6,7 +6,7 @@ using namespace M2DO_FEA ;
 
 StationaryStudy :: StationaryStudy (Mesh & mesh) : mesh (mesh) {
 
-	//
+	element_matrices_computed = false ;
 
 }
 
@@ -110,9 +110,14 @@ void StationaryStudy :: Assemble_K_With_Area_Fractions_Sparse (bool time_it) {
 
 	}
 
+	if (!element_matrices_computed) {
+
+		Compute_Element_Matrices (time_it) ;
+
+	}
+
 	int n_dof = mesh.n_dof - homogeneous_dirichlet_boundary_conditions.dof.size() ;
 	int reduced_dof_i, reduced_dof_j ;
-
 
 	/*
 		Over-size the triplet list to avoid having to resize
@@ -125,34 +130,33 @@ void StationaryStudy :: Assemble_K_With_Area_Fractions_Sparse (bool time_it) {
 
 	Matrix<double, -1, -1> K_e ;
 
-
 	/*
 		Solid elements:
 	*/
 
 	for (int k = 0 ; k < mesh.solid_elements.size() ; ++k) {
 
+		/*
+			Retrieve element matrix:
+		*/
+
 		auto && element = mesh.solid_elements[k] ;
 
+		int eid = 0 ;
+
+		if (!mesh.is_structured) {
+
+			eid = k ;
+
+		} // if NOT mesh.is_structured.
+
+		K_e = K_matrices_solid[eid] ;
+
 		/*
-			This gives the global dof numbers for the element:
+			Insert into global matrix:
 		*/
 
 		vector<int> dof = element.dof ;
-
-
-
-		if ( k == 0 or not mesh.is_structured ) {
-
-
-
-			K_e = element.K() ;
-
-
-
-		}
-
-
 
 		for (int i = 0 ; i < dof.size() ; ++i) {
 
@@ -289,6 +293,52 @@ void StationaryStudy :: Solve_With_CG ( bool time_it, double cg_tolerence, std::
 	for (int i = 0 ; i < n_dof_reduced ; ++i) {
 		u [homogeneous_dirichlet_boundary_conditions.reduced_dof_to_dof_map[i]] = u_reduced[i] ;
 	}
+
+	auto t_end = chrono::high_resolution_clock::now() ;
+
+	if (time_it) {
+
+		cout << "Done. Time elapsed = " << chrono::duration<double>(t_end-t_start).count() << "\n" << flush ;
+
+	}
+
+}
+
+void StationaryStudy :: Compute_Element_Matrices (bool time_it) {
+	
+	auto t_start = chrono::high_resolution_clock::now() ;
+
+	if (time_it) {
+
+		cout << "\n\tAssembling element matrices ... " << flush ;
+
+	}
+
+	/*
+		Solid Elements:
+	*/
+
+	if ( (mesh.is_structured) && (mesh.solid_elements.size() > 0) ) {
+
+		K_matrices_solid.resize (1) ;
+		K_matrices_solid[0] = mesh.solid_elements[0].K () ;
+
+	} // if mesh.is_structured.
+
+	else { // not structured.
+
+		K_matrices_solid.resize (mesh.solid_elements.size()) ;
+
+		#pragma omp parallel for
+		for (int k = 0 ; k < mesh.solid_elements.size() ; ++k) {
+
+			K_matrices_solid[k] = mesh.solid_elements[k].K () ;
+
+		} // for k solid_elements.
+
+	} // if NOT mesh.hex8_elements_are_structured.
+
+	element_matrices_computed = true ;
 
 	auto t_end = chrono::high_resolution_clock::now() ;
 

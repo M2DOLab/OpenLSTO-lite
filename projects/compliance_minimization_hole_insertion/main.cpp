@@ -47,7 +47,7 @@ int main () {
 	FEA::Mesh fea_mesh (2) ;
 
 	// Number of elements in x and y directions:
-	const unsigned int nelx = 160, nely = 80 ;
+	const unsigned int nelx = 80, nely = 40 ;
 
 	// fea_box contains the (x,y) coordinates of 4 corner points of rectangle containing the mesh:
   	Matrix<double, -1, -1> fea_box (4, 2) ;

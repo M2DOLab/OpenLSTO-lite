@@ -62,6 +62,9 @@ namespace M2DO_FEA {
 
 			std::vector<Triplet_Sparse> K_reduced; // stiffness matrix reduced
 
+			bool element_matrices_computed ;
+			vector< Matrix<double,-1,-1> > K_matrices_solid ;
+
 
 			std::vector<double> f ; // force vector
 			std::vector<double> f_reduced ; // force vector reduced
@@ -85,6 +88,7 @@ namespace M2DO_FEA {
 			void AssembleF (PointValues &, bool time_it) ;
 			void Assemble_K_With_Area_Fractions_Sparse (bool time_it) ;
 			void Solve_With_CG (bool time_it, double cg_tolerence, std::vector<double> &u_guess);// Solves [K_reduced] * {u_reduced} = {f_reduced}.
+			void Compute_Element_Matrices (bool time_it) ;
 
 
 
