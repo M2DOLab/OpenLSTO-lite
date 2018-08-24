@@ -1,5 +1,5 @@
-# OpenLSTO
-**Open Source Code for Level Set Topology Optimization**
+# OpenLSTO-lite
+**Open Source Code for Level Set Topology Optimization Lite version**
 
 OpenLSTO is an open-source software for level set based structural topology optimization, written in C++, developed and Maintained by researchers at UC San Diego and Cardiff University.
 
@@ -15,7 +15,7 @@ The level-set module of this software, M2DO_LSM, was adapted from code written b
 -  Download
 
 To clone the repository to the local machine,(git client) 
-```git clone https://github.com/M2DOLab/OpenLSTO.git```
+```git clone https://github.com/M2DOLab/OpenLSTO-lite.git```
 
 The Zip file is also avaiable with the following static link: 
 [Download link](http://m2do.ucsd.edu/static/zip/OpenLSTO-v0.1.zip)
