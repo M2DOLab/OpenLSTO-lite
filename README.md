@@ -7,7 +7,7 @@ The topology optimization method deals with the problem of determining the optim
 
 This first light version implements the M2DO lab’s level set topology optimization method to solve the problem of minimizing compliance (maximizing stiffness) under a volume constraint in a 2D design domain. It has been designed with ease of installation and use in mind. This means that, wherever possible, a conscious effort was made to develop in-house code components rather than relying on third-party packages or libraries. In simple cases (serial version with no external libraries), the code can be compiled and executed with just a C++ compiler.
 
-Extended capabilities using externally provided software are to be included in the next, more advanced version.
+Extended capabilities using externally provided software are to be included in the next, more advanced version, which is now available [here](https://github.com/M2DOLab/OpenLSTO.git).
 
 The level-set module of this software, M2DO_LSM, was adapted from code written by [Lester Hedges](https://github.com/lohedges/slsm), which can be found [here](https://github.com/lohedges/slsm).
 
